@@ -11,6 +11,7 @@
 import json
 import os
 import sys
+import time
 
 from PIL import Image, ImageFilter
 
@@ -48,7 +49,7 @@ def edges(img):
     return [hexc(L), hexc(R), hexc(T), hexc(B), hexc(avg)]
 
 
-meta = {'frames': N, 'size': S, 'labels': meta_in['labels']}
+meta = {'frames': N, 'size': S, 'version': int(time.time()), 'labels': meta_in['labels']}
 total = 0
 for name, cfg in SETS.items():
     d = os.path.join(OUT, name)

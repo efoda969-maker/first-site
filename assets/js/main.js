@@ -82,7 +82,8 @@
           const i = order[next++];
           const img = new Image();
           img.decoding = 'async';
-          img.src = `${SEQ}${name}/${String(i).padStart(4, '0')}.${info.ext}`;
+          // ?v= changes on every asset build, so the frames can be cached forever
+          img.src = `${SEQ}${name}/${String(i).padStart(4, '0')}.${info.ext}?v=${meta.version || 1}`;
           try {
             if (img.decode) await img.decode(); else await new Promise((r, j) => { img.onload = r; img.onerror = j; });
             set.frames[i] = img;
@@ -377,7 +378,7 @@
     doc.classList.add('is-loading');
     buildLabels();
     try {
-      meta = await (await fetch(`${SEQ}meta.json`)).json();
+      meta = await (await fetch(`${SEQ}meta.json`, { cache: 'no-cache' })).json();
     } catch (e) {
       enter();
       return;
