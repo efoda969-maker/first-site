@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blood Glass A16</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Manrope:wght@400;600&display=swap">
+<style>
+/* Layout: preview do celular à esquerda, controles e downloads à direita; empilha no celular. */
+:root {
+  --bg: #0b0204;
+  --panel: rgba(255, 60, 80, 0.06);
+  --line: rgba(255, 110, 125, 0.22);
+  --fg: #f6dfe2;
+  --muted: #b98b92;
+  --accent: #d0102a;
+  --accent-hi: #ff4258;
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.6 var(--body);
+  padding-inline: 16px; padding-block: 32px 48px;
+  background-image: radial-gradient(60rem 40rem at 10% 110%, rgba(208,16,42,.28), transparent 60%),
+                    radial-gradient(40rem 30rem at 100% -10%, rgba(120,0,20,.35), transparent 60%);
+  background-attachment: fixed;
+}
+main { max-width: 1040px; margin: 0 auto; display: grid; gap: 40px; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); align-items: start }
+@media (max-width: 760px) { main { grid-template-columns: minmax(0, 1fr) } }
+h1 { font: 800 clamp(30px, 6vw, 48px)/1.05 var(--display); margin: 0 0 8px; letter-spacing: -.01em; text-wrap: balance }
+h1 span { color: var(--accent-hi) }
+h2 { font: 500 13px/1.2 var(--display); text-transform: uppercase; letter-spacing: .14em; color: var(--muted); margin: 0 0 14px }
+p { margin: 0; max-width: 62ch }
+.lede { color: var(--muted) }
+.phone {
+  position: relative; width: 100%; max-width: 340px; aspect-ratio: 1080 / 2340; border-radius: 42px;
+  border: 10px solid #160407; box-shadow: 0 0 0 1px var(--line), 0 30px 80px rgba(208,16,42,.25);
+  overflow: hidden; background: #000;
+}
+.phone canvas.wp { position: absolute; inset: 0; width: 100%; height: 100% }
+.phone .grid { position: absolute; left: 7%; right: 7%; bottom: 16%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 7% 9% }
+.phone .grid img { width: 100%; display: block }
+.phone .dock { position: absolute; left: 7%; right: 7%; bottom: 4%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 9%; padding: 3%; border-radius: 22px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,140,150,.15); backdrop-filter: blur(8px) }
+.phone .dock img { width: 100%; display: block }
+.phone .clock { position: absolute; top: 9%; width: 100%; text-align: center; font: 500 46px/1 var(--display); color: #ffe9ec; text-shadow: 0 0 18px rgba(255,40,70,.6) }
+.phone .date { position: absolute; top: 17%; width: 100%; text-align: center; font: 600 12px var(--body); color: #f2c5cb; letter-spacing: .08em }
+.side { display: grid; gap: 32px; min-width: 0 }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px; backdrop-filter: blur(6px) }
+.row { display: flex; flex-wrap: wrap; gap: 10px }
+button {
+  font: 600 14px var(--body); color: var(--fg); background: rgba(208,16,42,.18); border: 1px solid rgba(255,66,88,.45);
+  padding: 10px 16px; border-radius: 999px; cursor: pointer;
+}
+button:hover { background: rgba(208,16,42,.35) }
+button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent-hi) }
+button:focus-visible { outline: 2px solid var(--accent-hi); outline-offset: 2px }
+.icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 16px }
+.icons figure { margin: 0; display: grid; gap: 6px; justify-items: center; text-align: center }
+.icons img { width: 64px; height: 64px; cursor: pointer }
+.icons figcaption { font-size: 12px; color: var(--muted); line-height: 1.3 }
+ol { margin: 0; padding-left: 20px; display: grid; gap: 8px }
+code { font-size: 13px; color: var(--accent-hi) }
+.spec { font: 500 12px var(--display); color: var(--muted); letter-spacing: .06em }
+@media (prefers-reduced-motion: no-preference) { .phone { transition: transform .4s } .phone:hover { transform: translateY(-4px) } }
+</style>
+</head>
+<body>
+<main>
+  <div class="phone" id="phone">
+    <canvas class="wp" id="wpPreview" width="540" height="1170"></canvas>
+    <div class="clock" id="pClock">12:00</div>
+    <div class="date" id="pDate"></div>
+    <div class="grid" id="pGrid"></div>
+    <div class="dock" id="pDock"></div>
+  </div>
+
+  <div class="side">
+    <header>
+      <h1>Blood <span>Glass</span></h1>
+      <p class="lede">Tema vermelho-sangue com ícones de vidro, no mesmo clima do Spicetify do seu PC. Feito para o Galaxy A16.</p>
+      <p class="spec">TELA 1080 × 2340 · 6,7" · ONE UI</p>
+    </header>
+
+    <section class="card">
+      <h2>Papel de parede</h2>
+      <div class="row" id="variants" role="group" aria-label="Estilo do papel de parede">
+        <button type="button" data-v="vidro" aria-pressed="true">Vidro estilhaçado</button>
+        <button type="button" data-v="gotas" aria-pressed="false">Gotas de sangue</button>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <button type="button" id="dlWp">Baixar papel de parede (PNG)</button>
+        <button type="button" id="reroll">Gerar outro</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Ícones de vidro · toque para baixar</h2>
+      <div class="icons" id="iconList"></div>
+    </section>
+
+    <section class="card">
+      <h2>Como aplicar no Galaxy A16</h2>
+      <ol>
+        <li><b>Papel de parede:</b> abra a imagem na Galeria, toque em <code>⋮</code> e depois em <code>Definir como papel de parede</code>. Escolha tela inicial e tela de bloqueio.</li>
+        <li><b>Ícones (opção Samsung):</b> instale o <b>Good Lock</b> pela Galaxy Store e, dentro dele, o <b>Theme Park</b>. Vá em <code>Ícone → Criar novo</code>, toque em cada app e escolha o PNG correspondente.</li>
+        <li><b>Ícones (alternativa):</b> instale o <b>Nova Launcher</b>, segure o dedo no app, toque em <code>Editar</code>, toque no ícone e escolha a imagem da Galeria.</li>
+        <li><b>Acabamento:</b> em <code>Configurações → Tela</code> ative o modo escuro. Em <code>Papel de parede e estilo → Paleta de cores</code> escolha o tom vermelho.</li>
+      </ol>
+    </section>
+  </div>
+</main>
+
+<script>
+const W = 1080, H = 2340;
+
+// Glifos 24×24 desenhados com traço (estilo linha).
+const ICONS = [
+  ["telefone", "Telefone", "M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"],
+  ["mensagens", "Mensagens", "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z M8 10h.01 M12 10h.01 M16 10h.01"],
+  ["whatsapp", "WhatsApp", "M7.9 20A9 9 0 1 0 4 16.1L2 22z M9 9.5c0 3 2.5 5.5 5.5 5.5l1.2-1.4-2-1-1 .8a4 4 0 0 1-2.1-2.1l.8-1-1-2z"],
+  ["camera", "Câmera", "M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M16 13a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"],
+  ["galeria", "Galeria", "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M21 15l-5-5L5 21 M10 8.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
+  ["spotify", "Spotify", "M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z M21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"],
+  ["youtube", "YouTube", "M2.5 17a24 24 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.6 49.6 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24 24 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.6 49.6 0 0 1-16.2 0A2 2 0 0 1 2.5 17z M10 15l5-3-5-3z"],
+  ["instagram", "Instagram", "M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5z M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z M17.5 6.5h.01"],
+  ["tiktok", "TikTok", "M9 12a4 4 0 1 0 4 4V2a5 5 0 0 0 5 5"],
+  ["navegador", "Chrome / Internet", "M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"],
+  ["playstore", "Play Store", "M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18 M16 10a4 4 0 0 1-8 0"],
+  ["jogos", "Jogos / Discord", "M6 11h4 M8 9v4 M15 12h.01 M18 10h.01 M17.3 5H6.7a4 4 0 0 0-4 3.6L2 15.5A3 3 0 0 0 7.2 18l1.3-2h7l1.3 2a3 3 0 0 0 5.2-2.5l-.7-6.9a4 4 0 0 0-4-3.6z"],
+  ["email", "E-mail", "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M22 6l-10 7L2 6"],
+  ["contatos", "Contatos", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"],
+  ["calendario", "Calendário", "M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M16 2v4 M8 2v4 M3 10h18"],
+  ["relogio", "Relógio", "M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0z M12 6v6l4 2"],
+  ["calculadora", "Calculadora", "M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z M8 6h8 M8 10h.01 M12 10h.01 M16 10h.01 M8 14h.01 M12 14h.01 M16 14h.01 M8 18h.01 M12 18h.01 M16 18h.01"],
+  ["notas", "Notas", "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8"],
+  ["arquivos", "Meus Arquivos", "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"],
+  ["config", "Configurações", "M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6"],
+];
+
+function rng(seed) { return () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646; }
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+
+function drawIcon(path, size = 512) {
+  const c = document.createElement("canvas"); c.width = c.height = size;
+  const ctx = c.getContext("2d"), s = size, pad = s * 0.04, r = s * 0.27;
+  // corpo de vidro translúcido
+  roundRect(ctx, pad, pad, s - 2 * pad, s - 2 * pad, r);
+  let g = ctx.createLinearGradient(0, pad, s, s - pad);
+  g.addColorStop(0, "rgba(150, 8, 28, 0.78)"); g.addColorStop(0.55, "rgba(70, 0, 12, 0.72)"); g.addColorStop(1, "rgba(25, 0, 5, 0.82)");
+  ctx.fillStyle = g; ctx.fill();
+  ctx.save(); ctx.clip();
+  // brilho interno vermelho embaixo
+  g = ctx.createRadialGradient(s * 0.5, s * 1.05, 0, s * 0.5, s * 1.05, s * 0.7);
+  g.addColorStop(0, "rgba(255, 40, 70, 0.55)"); g.addColorStop(1, "rgba(255, 40, 70, 0)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, s, s);
+  // reflexo diagonal do vidro
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(s, 0); ctx.lineTo(s, s * 0.18); ctx.quadraticCurveTo(s * 0.5, s * 0.5, 0, s * 0.46); ctx.closePath();
+  g = ctx.createLinearGradient(0, 0, 0, s * 0.5);
+  g.addColorStop(0, "rgba(255,255,255,0.30)"); g.addColorStop(1, "rgba(255,255,255,0.02)");
+  ctx.fillStyle = g; ctx.fill();
+  ctx.restore();
+  // borda
+  roundRect(ctx, pad + 2, pad + 2, s - 2 * pad - 4, s - 2 * pad - 4, r - 2);
+  g = ctx.createLinearGradient(0, 0, s, s);
+  g.addColorStop(0, "rgba(255,200,205,0.75)"); g.addColorStop(0.5, "rgba(255,80,100,0.25)"); g.addColorStop(1, "rgba(255,60,80,0.55)");
+  ctx.strokeStyle = g; ctx.lineWidth = s * 0.012; ctx.stroke();
+  // glifo
+  ctx.save();
+  const k = s * 0.5 / 24; ctx.translate(s * 0.25, s * 0.25); ctx.scale(k, k);
+  ctx.lineCap = ctx.lineJoin = "round"; ctx.lineWidth = 1.9;
+  ctx.shadowColor = "rgba(255, 30, 60, 0.95)"; ctx.shadowBlur = s * 0.06;
+  ctx.strokeStyle = "#ffe6e9"; ctx.stroke(new Path2D(path));
+  ctx.shadowBlur = 0; ctx.stroke(new Path2D(path));
+  ctx.restore();
+  return c;
+}
+
+function grain(ctx, rand, amount) {
+  const img = ctx.getImageData(0, 0, W, H), d = img.data;
+  for (let i = 0; i < d.length; i += 4) { const n = (rand() - 0.5) * amount; d[i] += n; d[i + 1] += n * 0.6; d[i + 2] += n * 0.6; }
+  ctx.putImageData(img, 0, 0);
+}
+
+function baseGlow(ctx, rand) {
+  ctx.fillStyle = "#060103"; ctx.fillRect(0, 0, W, H);
+  const blobs = [[0.15, 0.85, 900, "rgba(190,10,35,0.75)"], [0.9, 0.2, 700, "rgba(120,0,22,0.7)"], [0.6, 0.55, 500, "rgba(255,30,60,0.25)"]];
+  for (const [x, y, rad, col] of blobs) {
+    const cx = W * (x + (rand() - 0.5) * 0.15), cy = H * (y + (rand() - 0.5) * 0.08);
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+    g.addColorStop(0, col); g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  }
+}
+
+function wallpaperVidro(ctx, rand) {
+  baseGlow(ctx, rand);
+  // estilhaços de vidro a partir de um ponto de impacto
+  const ix = W * (0.3 + rand() * 0.4), iy = H * (0.38 + rand() * 0.15);
+  const n = 26, angles = Array.from({ length: n }, (_, i) => (i / n) * Math.PI * 2 + rand() * 0.18);
+  for (let i = 0; i < n; i++) {
+    const a1 = angles[i], a2 = angles[(i + 1) % n] + (i === n - 1 ? Math.PI * 2 : 0);
+    const r1 = 120 + rand() * 260, r2 = 1500 + rand() * 900;
+    ctx.beginPath();
+    ctx.moveTo(ix + Math.cos(a1) * r1, iy + Math.sin(a1) * r1);
+    ctx.lineTo(ix + Math.cos(a1) * r2, iy + Math.sin(a1) * r2);
+    ctx.lineTo(ix + Math.cos(a2) * r2, iy + Math.sin(a2) * r2);
+    ctx.lineTo(ix + Math.cos(a2) * r1, iy + Math.sin(a2) * r1);
+    ctx.closePath();
+    const g = ctx.createLinearGradient(ix, iy, ix + Math.cos(a1) * 1400, iy + Math.sin(a1) * 1400);
+    const a = 0.02 + rand() * 0.07;
+    g.addColorStop(0, `rgba(255,190,200,${a * 1.6})`); g.addColorStop(1, `rgba(255,60,80,${a * 0.2})`);
+    ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = `rgba(255,170,180,${0.10 + rand() * 0.25})`; ctx.lineWidth = 1 + rand() * 2; ctx.stroke();
+  }
+  // anéis concêntricos de rachadura
+  for (let ring = 0; ring < 3; ring++) {
+    const rr = 200 + ring * (180 + rand() * 120);
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const a = angles[i % n] + (i === n ? Math.PI * 2 : 0), j = rr * (0.85 + rand() * 0.3);
+      const x = ix + Math.cos(a) * j, y = iy + Math.sin(a) * j;
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.strokeStyle = `rgba(255,150,165,${0.25 - ring * 0.06})`; ctx.lineWidth = 1.5; ctx.stroke();
+  }
+  // núcleo do impacto
+  const g = ctx.createRadialGradient(ix, iy, 0, ix, iy, 260);
+  g.addColorStop(0, "rgba(255,120,140,0.55)"); g.addColorStop(0.3, "rgba(220,20,50,0.25)"); g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  vignette(ctx); grain(ctx, rand, 14);
+}
+
+function wallpaperGotas(ctx, rand) {
+  baseGlow(ctx, rand);
+  // escorridos do topo
+  const drips = 9;
+  for (let i = 0; i < drips; i++) {
+    const x = (i + 0.2 + rand() * 0.6) * (W / drips), w = 26 + rand() * 50, len = 260 + rand() * 900;
+    const g = ctx.createLinearGradient(0, 0, 0, len);
+    g.addColorStop(0, "#5a0010"); g.addColorStop(0.7, "#a3001c"); g.addColorStop(1, "#d1102e");
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(x - w, 0);
+    ctx.bezierCurveTo(x - w * 0.6, len * 0.3, x - w * 0.45, len * 0.7, x - w * 0.55, len);
+    ctx.arc(x, len, w * 0.55, Math.PI, 0, true);
+    ctx.bezierCurveTo(x + w * 0.45, len * 0.7, x + w * 0.6, len * 0.3, x + w, 0);
+    ctx.closePath(); ctx.fill();
+    // reflexo
+    ctx.fillStyle = "rgba(255,200,210,0.35)";
+    ctx.beginPath(); ctx.ellipse(x - w * 0.2, len - w * 0.05, w * 0.1, w * 0.22, -0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillRect(x - w * 0.35, 0, w * 0.08, len * 0.85);
+  }
+  // faixa superior contínua
+  ctx.fillStyle = "#4a000d"; ctx.fillRect(0, 0, W, 40);
+  // gotas espalhadas sobre "vidro"
+  for (let i = 0; i < 70; i++) {
+    const x = rand() * W, y = H * (0.45 + rand() * 0.55), r = 6 + rand() * rand() * 38;
+    const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
+    g.addColorStop(0, "rgba(255,140,155,0.9)"); g.addColorStop(0.35, "rgba(200,10,40,0.85)"); g.addColorStop(1, "rgba(60,0,10,0.9)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, r, r * (0.9 + rand() * 0.25), 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,0.55)"; ctx.beginPath(); ctx.arc(x - r * 0.35, y - r * 0.35, r * 0.18, 0, Math.PI * 2); ctx.fill();
+  }
+  vignette(ctx); grain(ctx, rand, 14);
+}
+
+function vignette(ctx) {
+  const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.75);
+  g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.6)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+}
+
+function renderWallpaper(variant, seed) {
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const ctx = c.getContext("2d"), rand = rng(seed);
+  (variant === "gotas" ? wallpaperGotas : wallpaperVidro)(ctx, rand);
+  return c;
+}
+
+function save(canvas, name) {
+  canvas.toBlob(b => {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }, "image/png");
+}
+
+let variant = "vidro", seed = 7, current;
+function refresh() {
+  current = renderWallpaper(variant, seed);
+  const p = document.getElementById("wpPreview");
+  p.getContext("2d").drawImage(current, 0, 0, p.width, p.height);
+}
+
+const iconCanvases = Object.fromEntries(ICONS.map(([id, , path]) => [id, drawIcon(path)]));
+const list = document.getElementById("iconList"), grid = document.getElementById("pGrid"), dock = document.getElementById("pDock");
+for (const [id, label] of ICONS) {
+  const url = iconCanvases[id].toDataURL();
+  const f = document.createElement("figure");
+  f.innerHTML = `<img alt="Ícone ${label}" src="${url}"><figcaption>${label}</figcaption>`;
+  f.querySelector("img").addEventListener("click", () => save(iconCanvases[id], `icone-${id}.png`));
+  list.appendChild(f);
+}
+["spotify", "youtube", "instagram", "tiktok", "galeria", "camera", "jogos", "config"].forEach(id => { const i = new Image(); i.src = iconCanvases[id].toDataURL(); i.alt = ""; grid.appendChild(i); });
+["telefone", "mensagens", "whatsapp", "navegador"].forEach(id => { const i = new Image(); i.src = iconCanvases[id].toDataURL(); i.alt = ""; dock.appendChild(i); });
+
+const now = new Date();
+document.getElementById("pClock").textContent = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+document.getElementById("pDate").textContent = now.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+
+document.getElementById("variants").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  variant = b.dataset.v;
+  document.querySelectorAll("#variants button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  refresh();
+});
+document.getElementById("reroll").addEventListener("click", () => { seed = Math.floor(Math.random() * 1e6) + 1; refresh(); });
+document.getElementById("dlWp").addEventListener("click", () => save(current, `papel-de-parede-${variant}.png`));
+
+// usado pelo script de exportação
+window.exportAll = () => ({
+  wallpapers: { vidro: renderWallpaper("vidro", 7).toDataURL(), gotas: renderWallpaper("gotas", 11).toDataURL() },
+  icons: Object.fromEntries(Object.entries(iconCanvases).map(([k, c]) => [k, c.toDataURL()])),
+});
+refresh();
+</script>
+</body>
+</html>
