@@ -57,18 +57,18 @@ def mat_fry():
 
 
 def mat_carton():
-    mat, nb = principled('Carton', color='#c8160b', rough=0.45, coat=0.2, coat_rough=0.3)
+    mat, nb = principled('Carton', color='#0d0b0a', rough=0.5, spec=0.4)
     # front panel artwork (front faces -Y). UV from object coords of the front.
-    vec = planar_uv(nb, 'X', 'Z', -0.05, 0.05, 0.0, 0.11)
+    vec = planar_uv(nb, 'X', 'Z', -0.05, 0.05, 0.0, 0.11 * 0.88)
     img = image_node(nb, 'fries_front.png', vec)
     nrm = nb.sep(nb.texco('Normal'))
     front = nb.maprange(nrm.outputs['Y'], -0.5, -0.8, 0.0, 1.0)
     inside = nb.n.new('ShaderNodeNewGeometry')
     back = nb.math('SUBTRACT', 1.0, inside.outputs['Backfacing'])
     m = nb.math('MULTIPLY', nb.math('MULTIPLY', front, img.outputs['Alpha']), back)
-    red = hexc('#c8160b')
+    red = hexc('#0d0b0a')
     col = nb.mix(m, red, img.outputs['Color'])
-    inner = nb.mix(inside.outputs['Backfacing'], col, hexc('#e8d8b8'))
+    inner = nb.mix(inside.outputs['Backfacing'], col, hexc('#1c1816'))
     nb.set('Base Color', inner)
     return mat
 
@@ -80,7 +80,7 @@ def build_fries(name='Fries', seed=21, count=34):
     nu, nv = 96, 16
     bw, bd = 0.074, 0.04      # bottom width / depth
     tw, td = 0.096, 0.058     # top width / depth
-    H = 0.108
+    H = 0.095
     bm = bmesh.new()
 
     def rect_point(u, w, d):
@@ -108,7 +108,7 @@ def build_fries(name='Fries', seed=21, count=34):
             pt, _, _ = rect_point(u, tw, td)
             top = H
             if side == 'front':
-                top = H - 0.03 * math.sin(t * math.pi) ** 1.5
+                top = H - 0.026 * math.sin(t * math.pi) ** 1.5
             elif side == 'side':
                 # sides blend from the lower front to the back height
                 y = pt.y / (td / 2)
@@ -138,7 +138,7 @@ def build_fries(name='Fries', seed=21, count=34):
     while placed < count:
         x = rnd.uniform(-0.032, 0.032)
         y = rnd.uniform(-0.011, 0.016)
-        L = rnd.uniform(0.085, 0.115)
+        L = rnd.uniform(0.075, 0.1)
         t = rnd.uniform(0.0075, 0.0095)
         g = bmesh.ops.create_cube(fbm, size=1.0)
         vs = g['verts']
@@ -168,7 +168,7 @@ def build_fries(name='Fries', seed=21, count=34):
 # ----------------------------------------------------------------------------
 def build_shake(name='Shake', seed=31):
     root = empty(name)
-    rb, rt, H = 0.028, 0.038, 0.095
+    rb, rt, H = 0.028, 0.038, 0.088
     # clear cup (thin shell)
     prof = [(0, 0.0), (rb - 0.004, 0.0), (rb, 0.003), (rt, H), (rt - 0.0012, H), (rb - 0.0012, 0.0042),
             (rb - 0.005, 0.0012), (0, 0.0012)]
@@ -193,21 +193,28 @@ def build_shake(name='Shake', seed=31):
     lz = H - 0.004
     lprof = [(0, 0.0016), (r_at(0.002) - 0.0018, 0.0016), (r_at(lz) - 0.0018, lz), (0, lz)]
     lbm, _ = lathe_bm(lprof, 96)
-    lmat, lnb = principled('ShakeChoc', rough=0.4, sss=0.6, sss_radius=(1, 0.6, 0.4), sss_scale=0.004)
-    nz = lnb.noise(scale=70.0, detail=3.0)
+    lmat, lnb = principled('ShakeCookie', rough=0.45, sss=0.4, sss_radius=(1, 0.85, 0.7), sss_scale=0.003)
+    nz = lnb.noise(scale=40.0, detail=3.0)
     sepz = lnb.sep(lnb.texco('Object'))
-    swirl = lnb.math('SINE', lnb.math('ADD', lnb.math('MULTIPLY', sepz.outputs['Z'], 140.0),
-                                      lnb.math('MULTIPLY', nz.outputs['Fac'], 6.0)))
-    col = lnb.ramp(lnb.maprange(swirl, -1, 1), [(0.0, hexc('#5a3220')), (0.6, hexc('#7d4a2e')), (1.0, hexc('#a06a45'))])
-    specks = lnb.voronoi(scale=500.0, feature='F1')
-    sm = lnb.maprange(specks.outputs['Distance'], 0.08, 0.03, 0.0, 1.0)
-    lnb.set('Base Color', lnb.mix(sm, col.outputs['Color'], hexc('#2b160b')))
+    ang = lnb.math('ARCTAN2', sepz.outputs['Y'], sepz.outputs['X'])
+    # chocolate drizzle running down the inside of the cup
+    wav = lnb.math('ADD', lnb.math('MULTIPLY', ang, 5.0),
+                   lnb.math('MULTIPLY', lnb.math('SINE', lnb.math('MULTIPLY', sepz.outputs['Z'], 90.0)), 0.35))
+    wav = lnb.math('ADD', wav, lnb.math('MULTIPLY', nz.outputs['Fac'], 1.2))
+    stripe = lnb.maprange(lnb.math('SINE', wav), 0.55, 0.8)
+    lower = lnb.maprange(sepz.outputs['Z'], 0.095, 0.02)
+    drizzle = lnb.math('MULTIPLY', stripe, lower)
+    base = lnb.ramp(nz.outputs['Fac'], [(0.3, hexc('#e6d6bd')), (0.7, hexc('#d6c1a0'))])
+    specks = lnb.voronoi(scale=380.0, feature='F1')
+    sm = lnb.maprange(specks.outputs['Distance'], 0.1, 0.04, 0.0, 1.0)
+    c1 = lnb.mix(sm, base.outputs['Color'], hexc('#24150c'))
+    lnb.set('Base Color', lnb.mix(drizzle, c1, hexc('#3a1d0c')))
     liq = mesh_object(name + '_liquid', lbm, [lmat])
     add_subsurf(liq, 1)
     set_parent(liq, root)
 
     # branded band (black sleeve) wrapped around the cup
-    bz0, bz1 = 0.03, 0.062
+    bz0, bz1 = 0.022, 0.07
     sprof = [(r_at(bz0) + 0.0007, bz0), (r_at(bz1) + 0.0007, bz1)]
     sbm = bmesh.new()
     segs = 128
@@ -221,13 +228,14 @@ def build_shake(name='Shake', seed=31):
         u0, u1 = i / segs, (i + 1) / segs
         for loop, uv in zip(f.loops, ((u0, 0), (u1, 0), (u1, 1), (u0, 1))):
             loop[uvl].uv = uv
-    bmat, bnb = principled('CupBand', color='#0d0b0a', rough=0.35)
+    bmat, bnb = principled('CupDecal', color='#0d0b0a', rough=0.3)
     uvn = bnb.texco('UV')
     mapping = bnb.node('ShaderNodeMapping')
     mapping.inputs['Location'].default_value = (0.37, 0, 0)
     bnb.link(uvn, mapping.inputs['Vector'])
     img = image_node(bnb, 'cup_band.png', mapping.outputs['Vector'], extension='REPEAT')
     bnb.set('Base Color', img.outputs['Color'])
+    bnb.set('Alpha', img.outputs['Alpha'])
     band = mesh_object(name + '_band', sbm, [bmat])
     add_solidify(band, 0.0006, offset=1.0)
     set_parent(band, root)
@@ -237,6 +245,9 @@ def build_shake(name='Shake', seed=31):
                             sss_scale=0.004)
     cn = cnb.noise(scale=260.0, detail=2.0)
     cnb.set('Normal', cnb.bump(cn.outputs['Fac'], strength=0.15, distance=0.0004))
+    crumbs = cnb.voronoi(scale=260.0, feature='F1')
+    cm = cnb.maprange(crumbs.outputs['Distance'], 0.12, 0.06, 0.0, 1.0)
+    cnb.set('Base Color', cnb.mix(cm, hexc('#fbf5ea'), hexc('#2a170c')))
     cbm = bmesh.new()
     steps, ring_n = 240, 16
     turns = 2.6
@@ -309,12 +320,12 @@ def build_shake(name='Shake', seed=31):
     st = snb.math('SINE', snb.math('ADD', snb.math('MULTIPLY', sepo.outputs['Z'], 260.0), ang))
     stm = snb.maprange(st, -0.15, 0.15)
     snb.set('Base Color', snb.mix(stm, hexc('#f3e9d2'), hexc('#d62718')))
-    bpy.ops.mesh.primitive_cylinder_add(radius=0.0036, depth=0.16, vertices=32, location=(0, 0, 0))
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.0036, depth=0.14, vertices=32, location=(0, 0, 0))
     straw = bpy.context.active_object
     straw.name = name + '_straw'
     straw.data.materials.append(smat)
     # pivot at base of straw
-    straw.data.transform(Matrix.Translation((0, 0, 0.08)))
+    straw.data.transform(Matrix.Translation((0, 0, 0.07)))
     straw.location = (-0.012, 0.01, 0.01)
     straw.rotation_euler = (math.radians(-12), math.radians(-14), 0)
     for p in straw.data.polygons:
@@ -379,11 +390,11 @@ def build_sauce_cup(name='Cup', color='#b3140c', seed=41):
 # ----------------------------------------------------------------------------
 # BOX
 # ----------------------------------------------------------------------------
-BOX_W, BOX_D, BOX_H = 0.42, 0.28, 0.17
+BOX_W, BOX_D, BOX_H = 0.48, 0.32, 0.15
 LID_SKIRT = 0.045
 
 
-def mat_box_outer(tex_lid='box_lid.png', tex_front='box_front.png', is_lid=False, lid_dims=(0.432, 0.292)):
+def mat_box_outer(tex_lid='box_lid.png', tex_front='box_front.png', is_lid=False, lid_dims=(0.492, 0.332)):
     mat, nb = principled('BoxOuterLid' if is_lid else 'BoxOuter', color='#0d0b0a', rough=0.55, spec=0.35,
                          sheen=0.08, sheen_tint=(0.8, 0.8, 0.8, 1))
     nrm = nb.sep(nb.texco('Normal'))
@@ -410,10 +421,21 @@ def mat_box_outer(tex_lid='box_lid.png', tex_front='box_front.png', is_lid=False
     return mat
 
 
-def mat_box_inner():
-    mat, nb = principled('BoxInner', color='#b81d10', rough=0.7)
+def mat_box_inner(printed=None, lid_dims=(0.492, 0.332)):
+    mat, nb = principled('BoxInnerPrinted' if printed else 'BoxInner', color='#151312', rough=0.7)
     fib = nb.noise(scale=400.0, detail=2.0)
     nb.set('Normal', nb.bump(fib.outputs['Fac'], strength=0.05, distance=0.0003))
+    if printed:
+        # underside of the lid: u = x, v = towards the front edge (reads upright when the lid is open)
+        sep = nb.sep(nb.texco('Object'))
+        comb = nb.node('ShaderNodeCombineXYZ')
+        nb.link(nb.maprange(sep.outputs['X'], -lid_dims[0] / 2, lid_dims[0] / 2, 0, 1, clamp_=False), comb.inputs['X'])
+        nb.link(nb.maprange(sep.outputs['Y'], 0.0, -lid_dims[1], 0, 1, clamp_=False), comb.inputs['Y'])
+        img = image_node(nb, printed, comb.outputs[0])
+        nrm = nb.sep(nb.texco('Normal'))
+        under = nb.maprange(nrm.outputs['Z'], -0.6, -0.85)
+        col = nb.mix(under, hexc('#151312'), img.outputs['Color'])
+        nb.set('Base Color', col)
     return mat
 
 
@@ -473,7 +495,8 @@ def build_box(name='Box'):
         out = Vector((c.x - cx, c.y - cy, c.z + LID_SKIRT / 2))
         if f.normal.dot(out) < 0:
             f.normal_flip()
-    lid = mesh_object(name + '_lid', lbm, [mat_box_outer(is_lid=True, lid_dims=(lw, ld)), inner], smooth_shade=False)
+    lid = mesh_object(name + '_lid', lbm, [mat_box_outer(is_lid=True, lid_dims=(lw, ld)),
+                                           mat_box_inner('box_lid_inner.png', (lw, ld))], smooth_shade=False)
     sol = lid.modifiers.new('Solidify', 'SOLIDIFY')
     sol.thickness = 0.004
     sol.offset = -1.0
@@ -483,4 +506,15 @@ def build_box(name='Box'):
     bev.segments = 3
     bev.limit_method = 'ANGLE'
     set_parent(lid, hinge)
+
+    # cardboard dividers: burger bay on the left, fries + shake behind, sauces in front
+    x_in = BOX_W / 2 - 0.005
+    for (cx, cy, sx, sy, sz) in ((-0.045, 0.0, 0.003, BOX_D - 0.01, 0.085),
+                                 ((-0.045 + x_in) / 2, -0.035, x_in + 0.045, 0.003, 0.06)):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(cx, cy, sz / 2))
+        d = bpy.context.active_object
+        d.name = name + '_divider'
+        d.scale = (sx, sy, sz)
+        d.data.materials.append(inner)
+        set_parent(d, root)
     return root, hinge

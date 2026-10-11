@@ -23,11 +23,11 @@ python3 -m http.server 8080
 
 | Progresso | Etapa |
 |---|---|
-| 0.00 – 0.14 | Cheeseburger sobre papel branco, mesa escura, luz de estúdio |
-| 0.14 – 0.43 | O hambúrguer cresce, as camadas se separam e o fundo vai do escuro ao creme |
-| 0.43 – 0.62 | As camadas se juntam; batata, milkshake e molhos chegam ao redor |
-| 0.62 – 0.95 | A caixa preta da marca entra, os produtos pulam para dentro e a tampa fecha |
-| 0.95 – 1.00 | Caixa fechada; em seguida o cardápio |
+| 0.00 – 0.14 | Smash burger sobre papel branco picotado, mesa de madeira escura, luz de estúdio |
+| 0.14 – 0.43 | A câmera aproxima, as camadas se separam na vertical e o fundo vai do escuro ao creme |
+| 0.43 – 0.62 | As camadas se juntam; batata, shake e molhos flutuam ao redor (Combo Dia de Jogo) |
+| 0.62 – 0.91 | O fundo vira uma bancada de inox; a caixa preta chega aberta, os produtos pulam para as divisórias e a tampa fecha |
+| 0.91 – 1.00 | Caixa fechada em destaque; em seguida o cardápio “A escalação” |
 
 ## Imagens (renderizações 3D)
 
@@ -36,9 +36,10 @@ Tudo foi modelado e renderizado proceduralmente no Blender (Cycles). Os scripts 
 | Arquivo | Função |
 |---|---|
 | `lib.py` | utilitários de geometria, curvas de animação e nós de material |
-| `burger.py` | pão, alface, tomate, carne, cheddar, molho, bacon, frango, picles |
+| `smash.py` | smash burger: pão brioche, carne prensada com borda rendada, cheddar americano escorrendo, cebola caramelizada, molho |
+| `burger.py` | ingredientes extras (alface, tomate, bacon, frango empanado, picles) e materiais compartilhados |
 | `props.py` | batata na embalagem, milkshake, potes de molho e a caixa com tampa articulada |
-| `env.py` | mesa de madeira escura → fundo creme, papel, luzes e câmera |
+| `env.py` | mesa de madeira escura → fundo creme → bancada de inox, papel picotado, cozinha desfocada, luzes e câmera |
 | `sequence.py` | coreografia completa e renderização dos quadros |
 | `menu.py` | fotos do cardápio |
 | `make_logo.py` | logotipo (SVG com as letras convertidas em curvas) e artes da embalagem |
@@ -50,7 +51,7 @@ Tudo foi modelado e renderizado proceduralmente no Blender (Cycles). Os scripts 
 python render-src/make_logo.py fonts/ assets/img/ build/tex/   # fonts/: Anton e Barlow Condensed (.ttf)
 node render-src/rasterize.js build/tex build/tex/*.svg
 ASB_TEX=build/tex blender -b -P render-src/sequence.py -- --out build/seq --frames 180 --size 1280 --samples 8
-ASB_TEX=build/tex blender -b -P render-src/menu.py -- --item classic --out build/menu
+ASB_TEX=build/tex blender -b -P render-src/menu.py -- --item enterrada --out build/menu   # e demais itens
 python render-src/build_assets.py build/seq build/menu .
 ```
 

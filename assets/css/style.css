@@ -180,7 +180,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .step--light .lede { color: rgba(243, 233, 210, .82); }
 .step--dark .lede { color: #3b332c; }
 .step--dark .eyebrow { color: var(--red); }
-.step__cta { display: flex; align-items: center; flex-wrap: wrap; gap: 18px 24px; margin-top: 34px; }
+.step__cta { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 16px; margin-top: 34px; }
+.step > .scroll-hint { margin-top: 30px; }
 .step--dark .btn--ghost { color: var(--black); }
 
 .scroll-hint {
@@ -274,6 +275,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .card__foot { margin-top: auto; padding-top: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .price { margin: 0; font: 700 26px/1 var(--f-cond); color: var(--orange); letter-spacing: .02em; }
 .price s { display: block; font-size: 15px; color: rgba(243, 233, 210, .45); font-weight: 600; margin-bottom: 4px; }
+.tag--ghost { background: transparent; box-shadow: inset 0 0 0 1.5px var(--orange); color: var(--orange); }
 .tag {
   align-self: flex-start; padding: 6px 12px; border-radius: 999px; background: var(--red); color: var(--cream);
   font: 700 12px/1 var(--f-cond); letter-spacing: .16em; text-transform: uppercase;
@@ -285,6 +287,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .card--feature .card__desc { font-size: 16px; }
 .card--feature .card__foot { margin-top: 18px; }
 .card--feature .price { font-size: 34px; }
+
+/* ---------------------------------------------------------------- marquee */
+.marquee { background: var(--red); color: var(--cream); overflow: hidden; padding: 18px 0; }
+.marquee__track { display: flex; align-items: center; gap: 36px; width: max-content; animation: marquee 22s linear infinite; }
+.marquee span { font: 400 clamp(40px, 6vw, 84px)/1 var(--f-display); text-transform: uppercase; letter-spacing: .01em; }
+.marquee i { font-style: normal; color: var(--black); font-size: clamp(24px, 3vw, 40px); }
+@keyframes marquee { to { transform: translateX(-50%); } }
 
 /* ---------------------------------------------------------------- about */
 .about { background: var(--black); color: var(--cream); padding: clamp(96px, 12vw, 170px) 0; }

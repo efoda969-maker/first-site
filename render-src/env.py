@@ -8,7 +8,7 @@ from mathutils import Vector, noise
 from lib import hexc, NB, principled, mesh_object, add_subsurf, link
 
 
-CREAM = '#efe3c8'
+CREAM = '#efe6d6'
 
 
 def render_settings(width, height, samples=96, threads=0):
@@ -39,8 +39,9 @@ def render_settings(width, height, samples=96, threads=0):
     if threads:
         sc.render.threads_mode = 'FIXED'
         sc.render.threads = threads
-    sc.view_settings.view_transform = 'AgX'
-    sc.view_settings.look = 'AgX - Punchy'
+    # PBR Neutral keeps food colours saturated (AgX drifts bright oranges to salmon)
+    sc.view_settings.view_transform = 'Khronos PBR Neutral'
+    sc.view_settings.look = 'None'
     sc.view_settings.exposure = 0.0
     sc.render.image_settings.file_format = 'PNG'
     sc.render.image_settings.color_mode = 'RGB'
@@ -88,7 +89,7 @@ def build_table(name='Table'):
         if f.normal.z < -0.1 or f.normal.y > 0.1:
             f.normal_flip()
 
-    mat, nb = principled('TableMat', rough=0.6, spec=0.3)
+    mat, nb = principled('TableMat', rough=0.65, spec=0.25)
     tc = nb.texco('Object')
     sepn = nb.sep(tc)
     plank_w = 0.155
@@ -116,8 +117,8 @@ def build_table(name='Table'):
     grainn = nb.noise(scale=3.0, detail=6.0, rough=0.6, vec=comb.outputs[0])
     g = nb.math('ADD', nb.math('MULTIPLY', wave.outputs['Fac'], 0.6), nb.math('MULTIPLY', grainn.outputs['Fac'], 0.5))
     tone = nb.math('MULTIPLY', wn.outputs['Value'], 0.25)
-    wood = nb.ramp(nb.math('ADD', g, tone), [(0.2, hexc('#080504')), (0.55, hexc('#150e0a')),
-                                              (0.8, hexc('#241812')), (1.0, hexc('#33241a'))])
+    wood = nb.ramp(nb.math('ADD', g, tone), [(0.2, hexc('#070403')), (0.55, hexc('#140c08')),
+                                              (0.8, hexc('#24160e')), (1.0, hexc('#352214'))])
     # dark seams between planks
     seam = nb.math('MAXIMUM', nb.maprange(frac, 0.012, 0.0, 0.0, 1.0), nb.maprange(frac, 0.988, 1.0, 0.0, 1.0))
     wood_c = nb.mix(seam, wood.outputs['Color'], hexc('#020101'))
@@ -128,54 +129,94 @@ def build_table(name='Table'):
     bgmix.name = 'BGMix'
     bgmix.outputs[0].default_value = 0.0
     col = nb.mix(bgmix.outputs[0], wood_c, cream)
+    # kitchen phase: brushed steel counter, charcoal wall
+    kmix = nb.node('ShaderNodeValue')
+    kmix.name = 'KitchenMix'
+    kmix.outputs[0].default_value = 0.0
+    brushed = nb.node('ShaderNodeMapping')
+    brushed.inputs['Scale'].default_value = (1.5, 260.0, 1.5)
+    nb.link(tc, brushed.inputs['Vector'])
+    bn = nb.noise(scale=6.0, detail=4.0, vec=brushed.outputs['Vector'])
+    floor_m = nb.maprange(sepn.outputs['Z'], 0.25, 0.05)
+    steel_c = nb.mix(nb.maprange(bn.outputs['Fac'], 0.3, 0.7, 0.0, 1.0), hexc('#7c7f83'), hexc('#a9acb0'))
+    kit_c = nb.mix(floor_m, hexc('#121213'), steel_c)
+    col = nb.mix(kmix.outputs[0], col, kit_c)
     nb.set('Base Color', col)
-    rough_w = nb.maprange(grainn.outputs['Fac'], 0.3, 0.7, 0.5, 0.78)
+    nb.set('Metallic', nb.math('MULTIPLY', kmix.outputs[0], floor_m))
+    rough_w = nb.maprange(grainn.outputs['Fac'], 0.3, 0.7, 0.55, 0.85)
     rough = nb.math('ADD', nb.math('MULTIPLY', rough_w, nb.math('SUBTRACT', 1.0, bgmix.outputs[0])),
                     nb.math('MULTIPLY', 0.9, bgmix.outputs[0]))
+    steel_r = nb.maprange(bn.outputs['Fac'], 0.3, 0.7, 0.22, 0.34)
+    rough = nb.math('ADD', nb.math('MULTIPLY', rough, nb.math('SUBTRACT', 1.0, kmix.outputs[0])),
+                    nb.math('MULTIPLY', steel_r, kmix.outputs[0]))
     nb.set('Roughness', rough)
     h = nb.math('ADD', nb.math('MULTIPLY', g, 0.4), nb.math('MULTIPLY', seam, -1.0))
-    bstr = nb.math('MULTIPLY', nb.math('SUBTRACT', 1.0, bgmix.outputs[0]), 0.35)
+    bstr = nb.math('ADD', nb.math('MULTIPLY', nb.math('SUBTRACT', 1.0, bgmix.outputs[0]), 0.35),
+                   nb.math('MULTIPLY', kmix.outputs[0], 0.04))
     bump = nb.node('ShaderNodeBump')
     bump.inputs['Distance'].default_value = 0.002
     nb.link(bstr, bump.inputs['Strength'])
     nb.link(h, bump.inputs['Height'])
     nb.set('Normal', bump.outputs['Normal'])
     # in the cream phase the sweep glows softly so the backdrop reads as clean paper
-    nb.set('Emission Color', hexc('#f2dcb2'))
+    nb.set('Emission Color', hexc('#f3e9d8'))
     wall = nb.maprange(sepn.outputs['Z'], 0.0, 1.4, 0.2, 1.25)
-    nb.set('Emission Strength', nb.math('MULTIPLY', bgmix.outputs[0], wall))
+    nb.set('Emission Strength', nb.math('MULTIPLY', nb.math('MULTIPLY', bgmix.outputs[0], wall),
+                                        nb.math('SUBTRACT', 1.0, kmix.outputs[0])))
     ob = mesh_object(name, bm, [mat])
+    ob['kmix'] = kmix.name
     return ob, bgmix
 
 
-def build_paper(name='Paper', size=0.27, rot=0.32, flat_r=0.075):
-    n = 72
+def build_paper(name='Paper', size=0.3, rot=0.28, flat_r=0.07, seed=3.0):
+    """Butcher paper with pinked (zig-zag) edges and real crinkles."""
+    n = 160                       # 4 cells per tooth
+    h = size / 2
+    depth = 0.0028
     bm = bmesh.new()
     rows = []
+    rnd = __import__('random').Random(int(seed * 10))
+    folds = []
+    for _ in range(7):
+        a = rnd.uniform(0, math.pi)
+        folds.append((math.cos(a), math.sin(a), rnd.uniform(-0.12, 0.12), rnd.uniform(0.0008, 0.0026) * rnd.choice((-1, 1)),
+                      rnd.uniform(0.006, 0.016)))
+
+    def valley(k):
+        return 1 - abs((k % 4) - 2) / 2.0
+
     for j in range(n + 1):
         row = []
         for i in range(n + 1):
-            x = (i / n - 0.5) * size
-            y = (j / n - 0.5) * size
+            x = -h + size * i / n
+            y = -h + size * j / n
+            if i == 0:
+                x += depth * valley(j)
+            elif i == n:
+                x -= depth * valley(j)
+            if j == 0:
+                y += depth * valley(i)
+            elif j == n:
+                y -= depth * valley(i)
             p = Vector((x, y, 0))
-            z = (0.0035 * noise.noise(p * 9 + Vector((3, 1, 0))) + 0.0012 * noise.noise(p * 26 + Vector((0, 7, 2)))
-                 + 0.0005 * noise.noise(p * 70))
-            # crisp crease lines
-            z += 0.0022 * max(0.0, 1 - abs(x * 0.8 + y * 0.6 - 0.05) / 0.012)
-            z += 0.0016 * max(0.0, 1 - abs(-x * 0.5 + y * 0.86 + 0.08) / 0.01)
+            z = (0.0024 * noise.noise(p * 8 + Vector((3, 1, seed))) + 0.0009 * noise.noise(p * 24 + Vector((0, 7, 2)))
+                 + 0.0004 * noise.noise(p * 80))
+            for (fx, fy, c, amp, wdt) in folds:
+                d = abs(x * fx + y * fy - c)
+                z += amp * max(0.0, 1 - d / wdt)
             r = math.hypot(x, y)
-            w = min(1.0, max(0.0, (r - flat_r) / 0.04))
-            z = (z + 0.0045) * w + 0.0012
-            # corners lift a little
-            z += 0.012 * max(0.0, (max(abs(x), abs(y)) - size * 0.38) / (size * 0.12)) ** 2
+            w = min(1.0, max(0.0, (r - flat_r) / 0.05))
+            z = (z + 0.003) * w + 0.0012
+            z += 0.01 * max(0.0, (max(abs(x), abs(y)) - h * 0.72) / (h * 0.28)) ** 2.2
             row.append(bm.verts.new((x, y, z)))
         rows.append(row)
     for j in range(n):
         for i in range(n):
             bm.faces.new((rows[j][i], rows[j][i + 1], rows[j + 1][i + 1], rows[j + 1][i]))
-    mat, nb = principled('PaperMat', color='#dedbd3', rough=0.62, sss=0.15, sss_radius=(1, 1, 1), sss_scale=0.002)
-    fib = nb.noise(scale=400.0, detail=4.0)
-    nb.set('Normal', nb.bump(fib.outputs['Fac'], strength=0.05, distance=0.0003))
+    mat, nb = principled('PaperMat', color='#d9d6cf', rough=0.55, sss=0.2, sss_radius=(1, 1, 1), sss_scale=0.002,
+                         sheen=0.2)
+    fib = nb.noise(scale=500.0, detail=4.0)
+    nb.set('Normal', nb.bump(fib.outputs['Fac'], strength=0.06, distance=0.0003))
     alpha = nb.node('ShaderNodeValue')
     alpha.name = 'PaperAlpha'
     alpha.outputs[0].default_value = 1.0
@@ -185,6 +226,39 @@ def build_paper(name='Paper', size=0.27, rot=0.32, flat_r=0.075):
     m.thickness = 0.0004
     ob.rotation_euler = (0, 0, rot)
     return ob, alpha
+
+
+def build_kitchen(name='Kitchen'):
+    """Out-of-focus commercial kitchen behind the steel counter: warm light
+    strips and steel blocks. Returns (root, [emissive materials' strength sockets])."""
+    from lib import empty, set_parent
+    root = empty(name)
+    lights = []
+    em, nb = principled('KitchenGlow', color='#000000', rough=1.0)
+    nb.set('Emission Color', hexc('#ffd7a0'))
+    glow = nb.node('ShaderNodeValue')
+    glow.outputs[0].default_value = 0.0
+    nb.set('Emission Strength', glow.outputs[0])
+    steel, snb = principled('KitchenSteel', color='#8d9094', rough=0.35, metal=1.0)
+    for i, (x, z, w) in enumerate(((-1.5, 0.78, 0.9), (-0.35, 0.86, 1.1), (0.9, 0.74, 0.8), (2.0, 0.82, 1.0))):
+        bpy.ops.mesh.primitive_plane_add(size=1.0, location=(x, 2.35, z), rotation=(math.pi / 2, 0, 0))
+        o = bpy.context.active_object
+        o.scale = (w, 0.06, 1)
+        o.data.materials.append(em)
+        set_parent(o, root)
+    for i, (x, sx, sz) in enumerate(((-1.25, 0.8, 0.85), (-0.2, 0.5, 0.95), (0.75, 0.9, 0.8), (1.8, 0.7, 0.9))):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(x, 2.05, 0.1 + sz / 2))
+        o = bpy.context.active_object
+        o.scale = (sx, 0.45, sz)
+        o.data.materials.append(steel)
+        set_parent(o, root)
+    for i in range(10):
+        x = -1.8 + i * 0.4
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.025, location=(x, 2.2, 0.3 + 0.18 * ((i * 7) % 3) / 2))
+        o = bpy.context.active_object
+        o.data.materials.append(em)
+        set_parent(o, root)
+    return root, glow
 
 
 def area_light(name, loc, target, size=(0.6, 0.6), power=50.0, color=(1, 1, 1), spread=180.0):

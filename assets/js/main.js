@@ -134,7 +134,7 @@
 
   // On landscape screens the product slides away from the side the copy is on.
   // [progress, shift as a fraction of the stage width]; + = product to the right.
-  const SHIFT = [[0, 0.12], [0.25, 0.12], [0.31, 0], [0.44, 0], [0.5, 0.12], [0.64, 0.12],
+  const SHIFT = [[0, 0.12], [0.25, 0.12], [0.31, 0.02], [0.45, 0.02], [0.5, 0.12], [0.64, 0.12],
     [0.7, -0.12], [0.88, -0.12], [0.93, 0.12], [1, 0.12]];
   function shiftAt(p) {
     for (let i = 0; i < SHIFT.length - 1; i++) {
@@ -293,12 +293,11 @@
 
   /* ------------------------------------------------------------ ingredient labels */
   const LABEL_COPY = {
-    bun_top: ['Pão brioche', 'Selado na manteiga'],
+    crown: ['Pão brioche', 'Tostado na manteiga'],
     sauce: ['Molho da casa', 'Receita secreta'],
-    cheese: ['Cheddar', 'Derretido na chapa'],
-    patty: ['Blend 180g', 'Na brasa, ao ponto'],
-    tomato: ['Tomate', 'Fatiado na hora'],
-    lettuce: ['Alface', 'Crocante e fresca'],
+    onions: ['Cebola caramelizada', 'Na chapa, sem pressa'],
+    pattycheese: ['Smash + cheddar', '2 × 90g, crosta crocante'],
+    heel: ['Pão tostado', 'Base que segura o jogo'],
   };
   function buildLabels() {
     labelsEl.innerHTML = '';
@@ -317,7 +316,7 @@
   }
 
   function updateLabels(set, fpos, p) {
-    const o = Math.min(smooth((p - 0.315) / 0.025), smooth((0.425 - p) / 0.025));
+    const o = Math.min(smooth((p - 0.315) / 0.025), smooth((0.435 - p) / 0.025));
     labelsEl.style.opacity = o.toFixed(3);
     if (o <= 0.001) return;
     const i0 = Math.floor(fpos);
@@ -430,14 +429,14 @@
 
   /* ------------------------------------------------------------ cart */
   const CATALOG = {
-    box: { name: 'All Star Box', price: 69.9 },
-    classic: { name: 'All Star Clássico', price: 32.9 },
-    double: { name: 'Double Star', price: 42.9 },
-    bacon: { name: 'Bacon Rockstar', price: 44.9 },
-    crispy: { name: 'Crispy Star', price: 36.9 },
-    fries: { name: 'Batata All Star', price: 16.9 },
-    sauces: { name: 'Trio de Molhos', price: 9.9 },
-    shake: { name: 'Milkshake de Chocolate', price: 22.9 },
+    box: { name: 'Combo Dia de Jogo', price: 69.9 },
+    enterrada: { name: 'Enterrada', price: 38.9 },
+    lance: { name: 'Lance Livre', price: 29.9 },
+    bandeja: { name: 'Bandeja', price: 42.9 },
+    gancho: { name: 'Gancho', price: 34.9 },
+    fries: { name: 'Batata Tempo Técnico', price: 16.9 },
+    sauces: { name: 'Molhos do Garrafão', price: 9.9 },
+    shake: { name: 'Shake Prorrogação', price: 22.9 },
   };
   const brl = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   let cart = {};
