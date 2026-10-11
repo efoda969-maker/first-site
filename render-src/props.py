@@ -173,7 +173,27 @@ def build_shake(name='Shake', seed=31):
     prof = [(0, 0.0), (rb - 0.004, 0.0), (rb, 0.003), (rt, H), (rt - 0.0012, H), (rb - 0.0012, 0.0042),
             (rb - 0.005, 0.0012), (0, 0.0012)]
     bm, _ = lathe_bm(prof, 96)
-    glass, nb = principled('CupPlastic', color='#ffffff', rough=0.04, trans=1.0, ior=1.45)
+    # thin clear plastic: transparent + fresnel reflection. A refractive glass
+    # would block shadow rays (caustics are off) and leave the shake black.
+    glass = bpy.data.materials.new('CupPlastic')
+    glass.use_nodes = True
+    gnt = glass.node_tree
+    gnt.nodes.remove(gnt.nodes['Principled BSDF'])
+    tr = gnt.nodes.new('ShaderNodeBsdfTransparent')
+    gl = gnt.nodes.new('ShaderNodeBsdfGlossy')
+    gl.inputs['Roughness'].default_value = 0.06
+    lw = gnt.nodes.new('ShaderNodeLayerWeight')
+    lw.inputs['Blend'].default_value = 0.25
+    fac = gnt.nodes.new('ShaderNodeMath')
+    fac.operation = 'MULTIPLY_ADD'
+    fac.inputs[1].default_value = 0.7
+    fac.inputs[2].default_value = 0.05
+    gnt.links.new(lw.outputs['Fresnel'], fac.inputs[0])
+    mx = gnt.nodes.new('ShaderNodeMixShader')
+    gnt.links.new(fac.outputs[0], mx.inputs[0])
+    gnt.links.new(tr.outputs[0], mx.inputs[1])
+    gnt.links.new(gl.outputs[0], mx.inputs[2])
+    gnt.links.new(mx.outputs[0], gnt.nodes['Material Output'].inputs['Surface'])
     cup = mesh_object(name + '_cup', bm, [glass])
     add_subsurf(cup, 1)
     set_parent(cup, root)

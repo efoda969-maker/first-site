@@ -138,7 +138,7 @@ def build_table(name='Table'):
     nb.link(tc, brushed.inputs['Vector'])
     bn = nb.noise(scale=6.0, detail=4.0, vec=brushed.outputs['Vector'])
     floor_m = nb.maprange(sepn.outputs['Z'], 0.25, 0.05)
-    steel_c = nb.mix(nb.maprange(bn.outputs['Fac'], 0.3, 0.7, 0.0, 1.0), hexc('#7c7f83'), hexc('#a9acb0'))
+    steel_c = nb.mix(nb.maprange(bn.outputs['Fac'], 0.3, 0.7, 0.0, 1.0), hexc('#55585c'), hexc('#7a7e82'))
     kit_c = nb.mix(floor_m, hexc('#121213'), steel_c)
     col = nb.mix(kmix.outputs[0], col, kit_c)
     nb.set('Base Color', col)
@@ -146,7 +146,7 @@ def build_table(name='Table'):
     rough_w = nb.maprange(grainn.outputs['Fac'], 0.3, 0.7, 0.55, 0.85)
     rough = nb.math('ADD', nb.math('MULTIPLY', rough_w, nb.math('SUBTRACT', 1.0, bgmix.outputs[0])),
                     nb.math('MULTIPLY', 0.9, bgmix.outputs[0]))
-    steel_r = nb.maprange(bn.outputs['Fac'], 0.3, 0.7, 0.22, 0.34)
+    steel_r = nb.maprange(bn.outputs['Fac'], 0.3, 0.7, 0.36, 0.5)
     rough = nb.math('ADD', nb.math('MULTIPLY', rough, nb.math('SUBTRACT', 1.0, kmix.outputs[0])),
                     nb.math('MULTIPLY', steel_r, kmix.outputs[0]))
     nb.set('Roughness', rough)
@@ -160,7 +160,7 @@ def build_table(name='Table'):
     nb.set('Normal', bump.outputs['Normal'])
     # in the cream phase the sweep glows softly so the backdrop reads as clean paper
     nb.set('Emission Color', hexc('#f3e9d8'))
-    wall = nb.maprange(sepn.outputs['Z'], 0.0, 1.4, 0.2, 1.25)
+    wall = nb.maprange(sepn.outputs['Z'], 0.0, 0.7, 0.3, 1.25)
     nb.set('Emission Strength', nb.math('MULTIPLY', nb.math('MULTIPLY', bgmix.outputs[0], wall),
                                         nb.math('SUBTRACT', 1.0, kmix.outputs[0])))
     ob = mesh_object(name, bm, [mat])
@@ -239,7 +239,7 @@ def build_kitchen(name='Kitchen'):
     glow = nb.node('ShaderNodeValue')
     glow.outputs[0].default_value = 0.0
     nb.set('Emission Strength', glow.outputs[0])
-    steel, snb = principled('KitchenSteel', color='#8d9094', rough=0.35, metal=1.0)
+    steel, snb = principled('KitchenSteel', color='#3c3f42', rough=0.5, metal=1.0)
     for i, (x, z, w) in enumerate(((-1.5, 0.78, 0.9), (-0.35, 0.86, 1.1), (0.9, 0.74, 0.8), (2.0, 0.82, 1.0))):
         bpy.ops.mesh.primitive_plane_add(size=1.0, location=(x, 2.35, z), rotation=(math.pi / 2, 0, 0))
         o = bpy.context.active_object

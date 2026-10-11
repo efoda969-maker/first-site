@@ -134,7 +134,7 @@
 
   // On landscape screens the product slides away from the side the copy is on.
   // [progress, shift as a fraction of the stage width]; + = product to the right.
-  const SHIFT = [[0, 0.12], [0.25, 0.12], [0.31, 0.02], [0.45, 0.02], [0.5, 0.12], [0.64, 0.12],
+  const SHIFT = [[0, 0.12], [0.25, 0.12], [0.31, 0.02], [0.45, 0.02], [0.5, 0.16], [0.64, 0.16],
     [0.7, -0.12], [0.88, -0.12], [0.93, 0.12], [1, 0.12]];
   function shiftAt(p) {
     for (let i = 0; i < SHIFT.length - 1; i++) {
@@ -253,8 +253,13 @@
     // legibility scrim on the copy side (dark during the intro, cream later)
     const portrait = set.name === 'mobile';
     const p = fpos / (meta.frames - 1);
-    const sc = p < 0.15 ? [5, 4, 3] : avg;
+    // intro and kitchen are dark scenes: dark scrim; cream scenes: cream scrim
+    const sc = p < 0.15 || p > 0.655 ? [8, 7, 6] : avg;
     const sh = shiftAt(p);
+    // copy colour follows what is actually behind it (scrim over the frame edge)
+    const sideEdge = hexToRgb(portrait ? edge[2] : (sh >= 0 ? edge[0] : edge[1]));
+    const behind = sideEdge.map((c, i) => c * 0.25 + sc[i] * 0.75);
+    stage.classList.toggle('on-dark', lum(behind) < 0.5);
     if (portrait) {
       shade.style.background = `linear-gradient(180deg, ${rgba(sc, 0.88)} 0%, ${rgba(sc, 0)} 27%, ${rgba(sc, 0)} 68%, ${rgba(sc, 0.92)} 100%)`;
     } else {
@@ -480,7 +485,11 @@
     drawer.classList.toggle('is-open', open);
     drawer.setAttribute('aria-hidden', String(!open));
     drawer.inert = !open;
-    if (open) { lastFocus = document.activeElement; $('.drawer__close', drawer).focus(); }
+    if (open) {
+      toast.classList.remove('is-on');
+      lastFocus = document.activeElement;
+      $('.drawer__close', drawer).focus();
+    }
     else if (lastFocus) { lastFocus.focus(); lastFocus = null; }
   }
   drawer.inert = true;

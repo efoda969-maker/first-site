@@ -85,10 +85,10 @@ YB = 0.36                         # box position (behind the combo)
 TK = (0, YB, 0.08)
 LK = [
     (area_light('K_Key', (-1.0, YB - 0.75, 1.0), TK, (1.0, 0.8), 1, spread=60), 26.0),
-    (area_light('K_Rim', (0.9, YB + 1.0, 0.7), TK, (1.2, 0.6), 1, spread=60), 34.0),
-    (area_light('K_RimL', (-0.9, YB + 0.9, 0.5), TK, (0.8, 0.5), 1, spread=60), 18.0),
+    (area_light('K_Rim', (0.9, YB + 1.0, 0.9), TK, (1.2, 0.6), 1, spread=45), 24.0),
+    (area_light('K_RimL', (-0.9, YB + 0.9, 0.7), TK, (0.8, 0.5), 1, spread=45), 13.0),
     (area_light('K_Top', (0.0, YB + 0.2, 1.5), TK, (1.0, 0.6), 1, spread=60), 10.0),
-    (area_light('K_Fill', (0.6, YB - 1.4, 0.35), TK, (1.0, 0.5), 1, spread=70), 5.0),
+    (area_light('K_Fill', (0.6, YB - 1.4, 0.8), TK, (1.0, 0.5), 1, spread=50), 2.5),
 ]
 cam = camera(60, 2.8)
 
@@ -224,9 +224,9 @@ def set_state(p):
     box.location = (0, lerp(1.7, YB, tbe), 0)
     box.rotation_euler = Euler((0, 0, 0.3 * (1 - tbe)), 'XYZ')
     open_ang = math.radians(-108)
-    tl = seg(p, 0.835, 0.885)
+    tl = seg(p, 0.822, 0.885)
     tl2 = seg(p, 0.885, 0.91)
-    ang = lerp(open_ang, 0.0, ease_in(tl))
+    ang = lerp(open_ang, 0.0, ease_in_out(tl) * 0.75 + ease_in(tl) * 0.25)
     if tl >= 1.0:
         ang = math.radians(-4) * math.sin(math.pi * tl2) * (1 - tl2)
     hinge.rotation_euler = Euler((ang, 0, 0), 'XYZ')

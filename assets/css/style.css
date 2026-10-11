@@ -168,21 +168,24 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .step {
   position: absolute;
   top: 50%; left: var(--gutter);
-  width: min(31vw, 500px);
+  width: min(34vw, 540px);
   transform: translateY(-50%);
   opacity: 0; visibility: hidden;
   will-change: opacity, transform;
 }
 .step--right { left: auto; right: var(--gutter); }
 .step--corner { top: calc(var(--bar-h) + 6vh); transform: none; }
-.step--light { color: var(--cream); }
-.step--dark { color: var(--black); }
-.step--light .lede { color: rgba(243, 233, 210, .82); }
-.step--dark .lede { color: #3b332c; }
-.step--dark .eyebrow { color: var(--red); }
+/* copy colour follows the frame behind it (JS toggles .on-dark on the stage) */
+.step { color: var(--black); transition: color .35s; }
+.step .lede { color: #3b332c; transition: color .35s; }
+.step .eyebrow { color: var(--red); transition: color .35s; }
+.on-dark .step { color: var(--cream); }
+.on-dark .step .lede { color: rgba(243, 233, 210, .84); }
+.on-dark .step .eyebrow { color: var(--orange); }
 .step__cta { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 16px; margin-top: 34px; }
+.labels { color: var(--black); }
 .step > .scroll-hint { margin-top: 30px; }
-.step--dark .btn--ghost { color: var(--black); }
+
 
 .scroll-hint {
   display: inline-flex; align-items: center; gap: 12px;
@@ -417,6 +420,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .step__cta { margin-top: 16px; }
   .step:not(.step--final) .step__cta .btn { display: none; }
   .step--final .lede { margin-top: auto; }
+  /* product sits high in these frames: copy goes to the bottom */
+  .step--low > .eyebrow { margin-top: auto; }
+  .step--low .lede { margin-top: 12px; }
   .progress { display: none; }
   .stage-bar { display: block; }
   .label__txt { padding: 0 8px; }

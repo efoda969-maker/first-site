@@ -114,10 +114,10 @@ if not kitchen_scene:
     area_light('Fill', T + Vector((0.35, -0.8, 0.07)) * k, target, (0.6 * k, 0.3 * k), 1.0 * k * k, spread=50)
 else:
     area_light('K_Key', (-1.0, -0.75, 1.0), target, (1.0, 0.8), 26, spread=60)
-    area_light('K_Rim', (0.9, 1.0, 0.7), target, (1.2, 0.6), 34, spread=60)
-    area_light('K_RimL', (-0.9, 0.9, 0.5), target, (0.8, 0.5), 18, spread=60)
+    area_light('K_Rim', (0.9, 1.0, 0.9), target, (1.2, 0.6), 24, spread=45)
+    area_light('K_RimL', (-0.9, 0.9, 0.7), target, (0.8, 0.5), 13, spread=45)
     area_light('K_Top', (0.0, 0.2, 1.5), target, (1.0, 0.6), 10, spread=60)
-    area_light('K_Fill', (0.6, -1.4, 0.35), target, (1.0, 0.5), 5, spread=70)
+    area_light('K_Fill', (0.6, -1.4, 0.8), target, (1.0, 0.5), 2.5, spread=50)
 cam = camera(lens, fstop)
 place_camera(cam, target, dist, elev, azim)
 sc.render.filepath = os.path.join(args.out, item + '.png')
