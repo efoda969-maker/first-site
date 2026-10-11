@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ALL STAR BURGERS — Hamburgueria artesanal</title>
+  <meta name="description" content="ALL STAR BURGERS: blend de 180g na brasa, cheddar derretido e pão brioche. Monte seu combo e peça agora.">
+  <meta name="theme-color" content="#0d0b0a">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ALL STAR BURGERS">
+  <meta property="og:description" content="Blend de 180g na brasa, cheddar derretido e pão brioche. Monte seu combo e peça agora.">
+  <meta property="og:image" content="assets/img/og.jpg">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preload" href="assets/seq/meta.json" as="fetch" crossorigin>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip" href="#cardapio">Pular para o cardápio</a>
+
+  <!-- ============================== PRELOADER -->
+  <div class="loader" id="loader" aria-live="polite">
+    <div class="loader__inner">
+      <img class="loader__logo" src="assets/img/logo-badge.svg" alt="ALL STAR BURGERS" width="800" height="305">
+      <div class="loader__bar"><span id="loaderBar"></span></div>
+      <p class="loader__txt"><span id="loaderPct">0</span>% · preparando a chapa</p>
+    </div>
+  </div>
+
+  <!-- ============================== HEADER -->
+  <header class="topbar" id="topbar">
+    <a class="topbar__logo" href="#topo" aria-label="ALL STAR BURGERS — início">
+      <img src="assets/img/logo.svg" alt="ALL STAR BURGERS" width="258" height="80">
+    </a>
+    <nav class="topbar__nav" id="nav" aria-label="Principal">
+      <a href="#experiencia">Experiência</a>
+      <a href="#cardapio">Cardápio</a>
+      <a href="#combo">Combos</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#contato">Contato</a>
+    </nav>
+    <div class="topbar__actions">
+      <button class="cart-btn" id="cartOpen" type="button" aria-label="Abrir sacola">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 7a3 3 0 0 1 6 0" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span class="cart-btn__count" id="cartCount">0</span>
+      </button>
+      <a class="btn btn--order" href="#cardapio">Peça agora</a>
+      <button class="burger-menu" id="menuToggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="topo">
+    <!-- ============================== SCROLL SEQUENCE -->
+    <section class="scrolly" id="experiencia" aria-label="Apresentação animada do ALL STAR CLÁSSICO">
+      <div class="stage" id="stage">
+        <canvas id="seq" role="img" aria-label="Cheeseburger ALL STAR se desmontando em camadas, virando combo e entrando na caixa preta da marca"></canvas>
+        <div class="stage__shade" id="shade"></div>
+
+        <div class="labels" id="labels" aria-hidden="true"></div>
+        <div class="stage-bar" aria-hidden="true"><span id="stageBar"></span></div>
+
+        <!-- step 1 -->
+        <article class="step step--light step--left" data-in="-1" data-out="0.105">
+          <p class="eyebrow">Hamburgueria artesanal</p>
+          <h1 class="display">Feito para<br>ser <span class="hl-orange">lenda</span></h1>
+          <p class="lede">Blend de 180g na brasa, cheddar derretido e brioche selado na manteiga. O clássico que virou estrela.</p>
+          <div class="step__cta">
+            <a class="btn btn--order" href="#cardapio">Peça agora</a>
+            <span class="scroll-hint"><i></i> Role para explorar</span>
+          </div>
+        </article>
+
+        <!-- step 2 -->
+        <article class="step step--dark step--left" data-in="0.165" data-out="0.285">
+          <p class="eyebrow">Anatomia de um astro</p>
+          <h2 class="display">Camada<br>por <span class="hl-red">camada</span></h2>
+          <p class="lede">Cada ingrediente tem um papel. Nenhum é figurante.</p>
+        </article>
+
+        <!-- step 2b (labels on screen) -->
+        <article class="step step--dark step--corner" data-in="0.3" data-out="0.43">
+          <p class="eyebrow">Nada de atalhos</p>
+          <h2 class="display display--sm">7 camadas.<br>Zero <span class="hl-orange">enrolação</span>.</h2>
+        </article>
+
+        <!-- step 3 -->
+        <article class="step step--dark step--left" data-in="0.5" data-out="0.655" id="combo-step">
+          <p class="eyebrow">Combo All Star</p>
+          <h2 class="display">Monte o<br>seu <span class="hl-red">combo</span></h2>
+          <p class="lede">Batata crocante, milkshake cremoso e o trio de molhos da casa: ketchup, cheddar e maionese de alho.</p>
+        </article>
+
+        <!-- step 4 -->
+        <article class="step step--dark step--right" data-in="0.69" data-out="0.885">
+          <p class="eyebrow">Embalado como estrela</p>
+          <h2 class="display">Tudo na<br><span class="hl-orange">caixa</span></h2>
+          <p class="lede">Nossa caixa preta segura o calor e chega fechadinha, do balcão até a sua porta.</p>
+        </article>
+
+        <!-- step 5 -->
+        <article class="step step--dark step--left step--final" data-in="0.915" data-out="2">
+          <p class="eyebrow">ALL STAR BOX · R$ 69,90</p>
+          <h2 class="display">Seu combo<br>está <span class="hl-red">pronto</span></h2>
+          <p class="lede">Clássico, batata, milkshake e trio de molhos. Escolha o seu e a gente coloca na chapa.</p>
+          <div class="step__cta">
+            <a class="btn btn--order" href="#cardapio">Ver cardápio</a>
+            <button class="btn btn--ghost" type="button" data-add="box">Pedir o box</button>
+          </div>
+        </article>
+
+        <ol class="progress" id="progress" aria-hidden="true">
+          <li data-at="0">Clássico</li>
+          <li data-at="0.3">Camadas</li>
+          <li data-at="0.55">Combo</li>
+          <li data-at="0.78">Caixa</li>
+          <li data-at="0.96">Pronto</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============================== MENU -->
+    <section class="menu" id="cardapio">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow eyebrow--red">Cardápio</p>
+          <h2 class="display display--section">Escolha o<br>seu astro</h2>
+          <p class="section-head__lede">Tudo feito na hora, na chapa e na brasa. Toque em <strong>Pedir</strong> para colocar na sacola.</p>
+        </header>
+
+        <div class="tabs" role="tablist" aria-label="Categorias do cardápio">
+          <button role="tab" aria-selected="true" data-filter="all">Todos</button>
+          <button role="tab" aria-selected="false" data-filter="burger">Burgers</button>
+          <button role="tab" aria-selected="false" data-filter="side">Acompanhamentos</button>
+          <button role="tab" aria-selected="false" data-filter="drink">Bebidas</button>
+          <button role="tab" aria-selected="false" data-filter="combo">Combos</button>
+        </div>
+
+        <ul class="grid" id="menuGrid">
+          <li class="card card--feature" data-cat="combo" id="combo">
+            <figure class="card__photo"><img src="assets/img/menu/combo.webp" alt="Caixa preta ALL STAR aberta com cheeseburger, batata, milkshake e molhos" loading="lazy" width="900" height="900"></figure>
+            <div class="card__body">
+              <span class="tag">Mais pedido</span>
+              <h3 class="card__name">All Star Box</h3>
+              <p class="card__desc">All Star Clássico + Batata All Star + Milkshake de chocolate + Trio de molhos, tudo na nossa caixa preta.</p>
+              <div class="card__foot">
+                <p class="price"><s>R$ 82,60</s> R$ 69,90</p>
+                <button class="btn btn--add" type="button" data-add="box">Pedir</button>
+              </div>
+            </div>
+          </li>
+          <li class="card" data-cat="burger">
+            <figure class="card__photo"><img src="assets/img/menu/classic.webp" alt="All Star Clássico: cheeseburger com alface, tomate, cheddar e pão brioche com gergelim" loading="lazy" width="900" height="900"></figure>
+            <div class="card__body">
+              <h3 class="card__name">All Star Clássico</h3>
+              <p class="card__desc">Blend 180g, cheddar derretido, alface, tomate e molho da casa no brioche.</p>
+              <div class="card__foot">
+                <p class="price">R$ 32,90</p>
+                <button class="btn btn--add" type="button" data-add="classic">Pedir</button>
+              </div>
+            </div>
+          </li>
+          <li class="card" data-cat="burger">
+            <figure class="card__photo"><img src="assets/img/menu/double.webp" alt="Double Star: dois hambúrgueres com cheddar duplo e picles" loading="lazy" width="900" height="900"></figure>
+            <div class="card__body">
+              <h3 class="card__name">Double Star</h3>
+              <p class="card__desc">Dois blends de 150g, cheddar em dobro, picles e molho da casa.</p>
+              <div class="card__foot">
+                <p class="price">R$ 42,90</p>
+                <button class="btn btn--add" type="button" data-add="double">Pedir</button>
+              </div>
+            </div>
+          </li>
+          <li class="card" data-cat="burger">
+            <figure class="card__photo"><img src="assets/img/menu/bacon.webp" alt="Bacon Rockstar: hambúrguer com bacon crocante, cebola e barbecue" loading="lazy" width="900" height="900"></figure>
+            <div class="card__body">
+              <h3 class="card__name">Bacon Rockstar</h3>
+              <p class="card__desc">Blend 180g, cheddar, bacon crocante, cebola roxa e barbecue defumado.</p>
+              <div class="card__foot">
+                <p class="price">R$ 44,90</p>
+                <button class="btn btn--add" type="button" data-add="bacon">Pedir</button>
+              </div>
+            </div>
+          </li>
+          <li class="card" data-cat="burger">
+            <figure class="card__photo"><img src="assets/img/menu/crispy.webp" alt="Crispy Star: frango empanado crocante com alface, tomate e maionese" loading="lazy" width="900" height="900"></figure>
+            <div class="card__body">
+              <h3 class="card__name">Crispy Star</h3>
+              <p class="card__desc">Sobrecoxa empanada e crocante, alface, tomate e maionese de ervas.</p>
+              <div class="card__foot">
+                <p class="price">R$ 36,90</p>
+                <button class="btn btn--add" type="button" data-add="crispy">Pedir</button>
+              </div>
+            </div>
+          </li>
+          <li class="card" data-cat="side">
+            <figure class="card__photo"><img src="assets/img/menu/fries.webp" alt="Batata All Star: batatas fritas na embalagem vermelha da marca" loading="lazy" width="900" height="900"></figure>
+            <div class="card__body">
+              <h3 class="card__name">Batata All Star</h3>
+              <p class="card__desc">Batata frita crocante por fora, macia por dentro, com sal de ervas.</p>
+              <div class="card__foot">
+                <p class="price">R$ 16,90</p>
+                <button class="btn btn--add" type="button" data-add="fries">Pedir</button>
+              </div>
+            </div>
+          </li>
+          <li class="card" data-cat="side">
+            <figure class="card__photo"><img src="assets/img/menu/sauces.webp" alt="Trio de molhos: ketchup, cheddar e maionese em potinhos" loading="lazy" width="900" height="900"></figure>
+            <div class="card__body">
+              <h3 class="card__name">Trio de Molhos</h3>
+              <p class="card__desc">Ketchup da casa, cheddar cremoso e maionese de alho.</p>
+              <div class="card__foot">
+                <p class="price">R$ 9,90</p>
+                <button class="btn btn--add" type="button" data-add="sauces">Pedir</button>
+              </div>
+            </div>
+          </li>
+          <li class="card" data-cat="drink">
+            <figure class="card__photo"><img src="assets/img/menu/shake.webp" alt="Milkshake de chocolate com chantilly, cereja e canudo listrado" loading="lazy" width="900" height="900"></figure>
+            <div class="card__body">
+              <h3 class="card__name">Milkshake de Chocolate</h3>
+              <p class="card__desc">Sorvete batido com chocolate meio amargo, chantilly e cereja.</p>
+              <div class="card__foot">
+                <p class="price">R$ 22,90</p>
+                <button class="btn btn--add" type="button" data-add="shake">Pedir</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================== ABOUT -->
+    <section class="about" id="sobre">
+      <div class="wrap about__grid">
+        <div>
+          <p class="eyebrow">Sobre a casa</p>
+          <h2 class="display display--section">Hambúrguer<br>sem <span class="hl-orange">figurante</span></h2>
+        </div>
+        <div class="about__copy">
+          <p>A ALL STAR BURGERS nasceu de uma ideia simples: tratar cada hambúrguer como a estrela do show. Blend moído na casa, pão brioche selado na manteiga e molhos feitos aqui mesmo, todos os dias.</p>
+          <p>Nada de congelado, nada de pressa na chapa. Só fogo alto, ingrediente bom e muito capricho na montagem.</p>
+        </div>
+        <ul class="stats">
+          <li><strong>180g</strong><span>de blend bovino em cada clássico</span></li>
+          <li><strong>100%</strong><span>molhos produzidos na casa</span></li>
+          <li><strong>7</strong><span>camadas no All Star Clássico</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================== CONTACT -->
+    <section class="visit" id="contato">
+      <div class="wrap visit__grid">
+        <div>
+          <p class="eyebrow eyebrow--red">Visite · Peça · Repita</p>
+          <h2 class="display display--section">Bora<br>comer?</h2>
+        </div>
+        <dl class="visit__info">
+          <div><dt>Endereço</dt><dd>Rua das Estrelas, 1000 — Centro</dd></div>
+          <div><dt>Horário</dt><dd>Ter a Dom · 18h às 23h30</dd></div>
+          <div><dt>Delivery</dt><dd>Pelo site ou WhatsApp, todos os dias de funcionamento</dd></div>
+        </dl>
+        <a class="btn btn--order btn--big" href="#cardapio">Peça agora</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__grid">
+      <img src="assets/img/logo-badge.svg" alt="ALL STAR BURGERS" width="800" height="305" loading="lazy">
+      <p>© <span id="year">2026</span> ALL STAR BURGERS. Imagens dos produtos renderizadas em 3D.</p>
+    </div>
+  </footer>
+
+  <!-- ============================== CART -->
+  <div class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer__backdrop" data-close></div>
+    <aside class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <header class="drawer__head">
+        <h2 id="drawerTitle">Sua sacola</h2>
+        <button class="drawer__close" type="button" data-close aria-label="Fechar sacola">×</button>
+      </header>
+      <ul class="drawer__list" id="cartList"></ul>
+      <p class="drawer__empty" id="cartEmpty">Sua sacola está vazia. Bora escolher um astro?</p>
+      <footer class="drawer__foot">
+        <p class="drawer__total"><span>Total</span><strong id="cartTotal">R$ 0,00</strong></p>
+        <a class="btn btn--order btn--block" id="checkout" href="#" target="_blank" rel="noopener">Finalizar pelo WhatsApp</a>
+      </footer>
+    </aside>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <noscript><style>.loader{display:none}.scrolly{height:auto}.stage{position:relative;background:url(assets/seq/poster.webp) center/cover}.step{opacity:1;position:relative}</style></noscript>
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>
