@@ -42,11 +42,13 @@ Tudo foi modelado e renderizado proceduralmente no Blender (Cycles). Os scripts 
 | `sequence.py` | coreografia completa e renderização dos quadros |
 | `menu.py` | fotos do cardápio |
 | `make_logo.py` | logotipo (SVG com as letras convertidas em curvas) e artes da embalagem |
+| `rasterize.js` | converte as artes SVG em PNG (Playwright) para usar como textura |
 | `build_assets.py` | recortes 16:9 / 9:16, WebP, cores de borda e `meta.json` |
 
 ```bash
-# Blender 4.5 LTS; as artes da embalagem são PNGs gerados a partir de make_logo.py
-python render-src/make_logo.py fonts/ assets/img/ build/tex/
+# Blender 4.5 LTS · Python com fonttools e Pillow · Node com Playwright
+python render-src/make_logo.py fonts/ assets/img/ build/tex/   # fonts/: Anton e Barlow Condensed (.ttf)
+node render-src/rasterize.js build/tex build/tex/*.svg
 ASB_TEX=build/tex blender -b -P render-src/sequence.py -- --out build/seq --frames 180 --size 1280 --samples 8
 ASB_TEX=build/tex blender -b -P render-src/menu.py -- --item classic --out build/menu
 python render-src/build_assets.py build/seq build/menu .

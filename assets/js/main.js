@@ -423,7 +423,7 @@
   const tabs = $$('.tabs button');
   const cards = $$('#menuGrid .card');
   tabs.forEach((tab) => tab.addEventListener('click', () => {
-    tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+    tabs.forEach((t) => t.setAttribute('aria-pressed', String(t === tab)));
     const f = tab.dataset.filter;
     cards.forEach((c) => { c.hidden = !(f === 'all' || c.dataset.cat === f); });
   }));
@@ -476,11 +476,15 @@
     checkout.setAttribute('aria-disabled', String(ids.length === 0));
   }
 
+  let lastFocus = null;
   function openCart(open) {
     drawer.classList.toggle('is-open', open);
     drawer.setAttribute('aria-hidden', String(!open));
-    if (open) $('.drawer__close', drawer).focus();
+    drawer.inert = !open;
+    if (open) { lastFocus = document.activeElement; $('.drawer__close', drawer).focus(); }
+    else if (lastFocus) { lastFocus.focus(); lastFocus = null; }
   }
+  drawer.inert = true;
 
   function add(id) {
     if (!CATALOG[id]) return;
@@ -506,7 +510,7 @@
     if (e.target.closest('[data-close]')) openCart(false);
   });
   cartBtn.addEventListener('click', () => openCart(true));
-  addEventListener('keydown', (e) => { if (e.key === 'Escape') openCart(false); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawer.classList.contains('is-open')) openCart(false); });
   renderCart();
 
   const year = $('#year');

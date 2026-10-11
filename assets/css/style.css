@@ -252,7 +252,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   transition: background .2s, color .2s, border-color .2s;
 }
 .tabs button:hover { border-color: var(--black); }
-.tabs button[aria-selected="true"] { background: var(--black); color: var(--cream); border-color: var(--black); }
+.tabs button[aria-pressed="true"] { background: var(--black); color: var(--cream); border-color: var(--black); }
 
 .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 24px; }
 .card {
