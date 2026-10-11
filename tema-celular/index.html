@@ -86,13 +86,8 @@ code { font-size: 13px; color: var(--accent-hi) }
 
     <section class="card">
       <h2>Papel de parede</h2>
-      <div class="row" id="variants" role="group" aria-label="Estilo do papel de parede">
-        <button type="button" data-v="vidro" aria-pressed="true">Vidro estilhaçado</button>
-        <button type="button" data-v="gotas" aria-pressed="false">Gotas de sangue</button>
-      </div>
-      <div class="row" style="margin-top:14px">
+      <div class="row">
         <button type="button" id="dlWp">Baixar papel de parede (PNG)</button>
-        <button type="button" id="reroll">Gerar outro</button>
       </div>
     </section>
 
@@ -157,10 +152,6 @@ function drawIcon(path, size = 512) {
   g.addColorStop(0, "rgba(170, 10, 32, 0.34)"); g.addColorStop(0.55, "rgba(90, 0, 16, 0.22)"); g.addColorStop(1, "rgba(40, 0, 8, 0.32)");
   ctx.fillStyle = g; ctx.fill();
   ctx.save(); ctx.clip();
-  // brilho interno vermelho embaixo
-  g = ctx.createRadialGradient(s * 0.5, s * 1.05, 0, s * 0.5, s * 1.05, s * 0.7);
-  g.addColorStop(0, "rgba(255, 40, 70, 0.35)"); g.addColorStop(1, "rgba(255, 40, 70, 0)");
-  ctx.fillStyle = g; ctx.fillRect(0, 0, s, s);
   // reflexo diagonal do vidro
   ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(s, 0); ctx.lineTo(s, s * 0.18); ctx.quadraticCurveTo(s * 0.5, s * 0.5, 0, s * 0.46); ctx.closePath();
   g = ctx.createLinearGradient(0, 0, 0, s * 0.5);
@@ -176,9 +167,7 @@ function drawIcon(path, size = 512) {
   ctx.save();
   const k = s * 0.5 / 24; ctx.translate(s * 0.25, s * 0.25); ctx.scale(k, k);
   ctx.lineCap = ctx.lineJoin = "round"; ctx.lineWidth = 1.9;
-  ctx.shadowColor = "rgba(255, 30, 60, 0.95)"; ctx.shadowBlur = s * 0.06;
-  ctx.strokeStyle = "#ffe6e9"; ctx.stroke(new Path2D(path));
-  ctx.shadowBlur = 0; ctx.stroke(new Path2D(path));
+  ctx.strokeStyle = "#fff4f5"; ctx.stroke(new Path2D(path));
   ctx.restore();
   return c;
 }
@@ -189,87 +178,14 @@ function grain(ctx, rand, amount) {
   ctx.putImageData(img, 0, 0);
 }
 
-function baseGlow(ctx, rand) {
-  ctx.fillStyle = "#060103"; ctx.fillRect(0, 0, W, H);
-  const blobs = [[0.15, 0.85, 900, "rgba(190,10,35,0.75)"], [0.9, 0.2, 700, "rgba(120,0,22,0.7)"], [0.6, 0.55, 500, "rgba(255,30,60,0.25)"]];
-  for (const [x, y, rad, col] of blobs) {
-    const cx = W * (x + (rand() - 0.5) * 0.15), cy = H * (y + (rand() - 0.5) * 0.08);
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
-    g.addColorStop(0, col); g.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  }
-}
-
-function wallpaperVidro(ctx, rand) {
-  baseGlow(ctx, rand);
-  // estilhaços de vidro a partir de um ponto de impacto
-  const ix = W * 0.5, iy = H * 0.45;
-  const n = 26, angles = Array.from({ length: n }, (_, i) => (i / n) * Math.PI * 2 + rand() * 0.18);
-  for (let i = 0; i < n; i++) {
-    const a1 = angles[i], a2 = angles[(i + 1) % n] + (i === n - 1 ? Math.PI * 2 : 0);
-    const r1 = 120 + rand() * 260, r2 = 1500 + rand() * 900;
-    ctx.beginPath();
-    ctx.moveTo(ix + Math.cos(a1) * r1, iy + Math.sin(a1) * r1);
-    ctx.lineTo(ix + Math.cos(a1) * r2, iy + Math.sin(a1) * r2);
-    ctx.lineTo(ix + Math.cos(a2) * r2, iy + Math.sin(a2) * r2);
-    ctx.lineTo(ix + Math.cos(a2) * r1, iy + Math.sin(a2) * r1);
-    ctx.closePath();
-    const g = ctx.createLinearGradient(ix, iy, ix + Math.cos(a1) * 1400, iy + Math.sin(a1) * 1400);
-    const a = 0.02 + rand() * 0.07;
-    g.addColorStop(0, `rgba(255,190,200,${a * 1.6})`); g.addColorStop(1, `rgba(255,60,80,${a * 0.2})`);
-    ctx.fillStyle = g; ctx.fill();
-    ctx.strokeStyle = `rgba(255,170,180,${0.10 + rand() * 0.25})`; ctx.lineWidth = 1 + rand() * 2; ctx.stroke();
-  }
-  // anéis concêntricos de rachadura
-  for (let ring = 0; ring < 3; ring++) {
-    const rr = 200 + ring * (180 + rand() * 120);
-    ctx.beginPath();
-    for (let i = 0; i <= n; i++) {
-      const a = angles[i % n] + (i === n ? Math.PI * 2 : 0), j = rr * (0.85 + rand() * 0.3);
-      const x = ix + Math.cos(a) * j, y = iy + Math.sin(a) * j;
-      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-    }
-    ctx.strokeStyle = `rgba(255,150,165,${0.25 - ring * 0.06})`; ctx.lineWidth = 1.5; ctx.stroke();
-  }
-  // núcleo do impacto
-  const g = ctx.createRadialGradient(ix, iy, 0, ix, iy, 260);
-  g.addColorStop(0, "rgba(255,120,140,0.55)"); g.addColorStop(0.3, "rgba(220,20,50,0.25)"); g.addColorStop(1, "rgba(0,0,0,0)");
+function wallpaperSangue(ctx, rand) {
+  // fundo vermelho-sangue liso, um pouco mais claro atrás da cruz
+  ctx.fillStyle = "#5e0008"; ctx.fillRect(0, 0, W, H);
+  const g = ctx.createRadialGradient(W * 0.5, H * 0.45, 0, W * 0.5, H * 0.45, H * 0.6);
+  g.addColorStop(0, "#8a0010"); g.addColorStop(1, "rgba(94,0,8,0)");
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  templarCross(ctx, ix, iy, 300);
-  vignette(ctx); grain(ctx, rand, 14);
-}
-
-function wallpaperGotas(ctx, rand) {
-  baseGlow(ctx, rand);
-  // escorridos do topo
-  const drips = 9;
-  for (let i = 0; i < drips; i++) {
-    const x = (i + 0.2 + rand() * 0.6) * (W / drips), w = 26 + rand() * 50, len = 260 + rand() * 900;
-    const g = ctx.createLinearGradient(0, 0, 0, len);
-    g.addColorStop(0, "#5a0010"); g.addColorStop(0.7, "#a3001c"); g.addColorStop(1, "#d1102e");
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.moveTo(x - w, 0);
-    ctx.bezierCurveTo(x - w * 0.6, len * 0.3, x - w * 0.45, len * 0.7, x - w * 0.55, len);
-    ctx.arc(x, len, w * 0.55, Math.PI, 0, true);
-    ctx.bezierCurveTo(x + w * 0.45, len * 0.7, x + w * 0.6, len * 0.3, x + w, 0);
-    ctx.closePath(); ctx.fill();
-    // reflexo
-    ctx.fillStyle = "rgba(255,200,210,0.35)";
-    ctx.beginPath(); ctx.ellipse(x - w * 0.2, len - w * 0.05, w * 0.1, w * 0.22, -0.3, 0, Math.PI * 2); ctx.fill();
-    ctx.fillRect(x - w * 0.35, 0, w * 0.08, len * 0.85);
-  }
-  // faixa superior contínua
-  ctx.fillStyle = "#4a000d"; ctx.fillRect(0, 0, W, 40);
-  // gotas espalhadas sobre "vidro"
-  for (let i = 0; i < 70; i++) {
-    const x = rand() * W, y = H * (0.45 + rand() * 0.55), r = 6 + rand() * rand() * 38;
-    const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
-    g.addColorStop(0, "rgba(255,140,155,0.9)"); g.addColorStop(0.35, "rgba(200,10,40,0.85)"); g.addColorStop(1, "rgba(60,0,10,0.9)");
-    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, r, r * (0.9 + rand() * 0.25), 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "rgba(255,255,255,0.55)"; ctx.beginPath(); ctx.arc(x - r * 0.35, y - r * 0.35, r * 0.18, 0, Math.PI * 2); ctx.fill();
-  }
   templarCross(ctx, W * 0.5, H * 0.45, 300);
-  vignette(ctx); grain(ctx, rand, 14);
+  vignette(ctx); grain(ctx, rand, 8);
 }
 
 // Cruz pátea da Ordem dos Templários, em vidro vermelho.
@@ -286,12 +202,10 @@ function crossPath(cx, cy, L) {
 
 function templarCross(ctx, cx, cy, L) {
   // halo atrás da cruz
-  let g = ctx.createRadialGradient(cx, cy, 0, cx, cy, L * 1.6);
-  g.addColorStop(0, "rgba(255,40,70,0.35)"); g.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  let g;
   const outer = crossPath(cx, cy, L), inner = crossPath(cx, cy, L * 0.86);
   ctx.save();
-  ctx.shadowColor = "rgba(255,20,50,0.9)"; ctx.shadowBlur = 70;
+  ctx.shadowColor = "rgba(20,0,2,0.75)"; ctx.shadowBlur = 60; ctx.shadowOffsetY = 18;
   g = ctx.createLinearGradient(cx - L, cy - L, cx + L, cy + L);
   g.addColorStop(0, "rgba(230,20,50,0.85)"); g.addColorStop(0.5, "rgba(140,0,22,0.75)"); g.addColorStop(1, "rgba(200,10,40,0.85)");
   ctx.fillStyle = g; ctx.fill(outer);
@@ -310,14 +224,14 @@ function templarCross(ctx, cx, cy, L) {
 
 function vignette(ctx) {
   const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.75);
-  g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.6)");
+  g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.45)");
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 }
 
-function renderWallpaper(variant, seed) {
+function renderWallpaper(seed) {
   const c = document.createElement("canvas"); c.width = W; c.height = H;
   const ctx = c.getContext("2d"), rand = rng(seed);
-  (variant === "gotas" ? wallpaperGotas : wallpaperVidro)(ctx, rand);
+  wallpaperSangue(ctx, rand);
   return c;
 }
 
@@ -328,9 +242,9 @@ function save(canvas, name) {
   }, "image/png");
 }
 
-let variant = "vidro", seed = 7, current;
+let current;
 function refresh() {
-  current = renderWallpaper(variant, seed);
+  current = renderWallpaper(7);
   const p = document.getElementById("wpPreview");
   p.getContext("2d").drawImage(current, 0, 0, p.width, p.height);
 }
@@ -351,18 +265,11 @@ const now = new Date();
 document.getElementById("pClock").textContent = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 document.getElementById("pDate").textContent = now.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
 
-document.getElementById("variants").addEventListener("click", e => {
-  const b = e.target.closest("button"); if (!b) return;
-  variant = b.dataset.v;
-  document.querySelectorAll("#variants button").forEach(x => x.setAttribute("aria-pressed", x === b));
-  refresh();
-});
-document.getElementById("reroll").addEventListener("click", () => { seed = Math.floor(Math.random() * 1e6) + 1; refresh(); });
-document.getElementById("dlWp").addEventListener("click", () => save(current, `papel-de-parede-${variant}.png`));
+document.getElementById("dlWp").addEventListener("click", () => save(current, "papel-de-parede-templario.png"));
 
 // usado pelo script de exportação
 window.exportAll = () => ({
-  wallpapers: { vidro: renderWallpaper("vidro", 7).toDataURL(), gotas: renderWallpaper("gotas", 11).toDataURL() },
+  wallpapers: { templario: renderWallpaper(7).toDataURL() },
   icons: Object.fromEntries(Object.entries(iconCanvases).map(([k, c]) => [k, c.toDataURL()])),
 });
 refresh();
