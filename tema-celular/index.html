@@ -80,7 +80,7 @@ code { font-size: 13px; color: var(--accent-hi) }
   <div class="side">
     <header>
       <h1>Blood <span>Glass</span></h1>
-      <p class="lede">Tema vermelho-sangue com ícones de vidro, no mesmo clima do Spicetify do seu PC. Feito para o Galaxy A16.</p>
+      <p class="lede">Tema vermelho-sangue com a cruz dos Templários e ícones de vidro, no mesmo clima do Spicetify do seu PC. Feito para o Galaxy A16.</p>
       <p class="spec">TELA 1080 × 2340 · 6,7" · ONE UI</p>
     </header>
 
@@ -154,17 +154,17 @@ function drawIcon(path, size = 512) {
   // corpo de vidro translúcido
   roundRect(ctx, pad, pad, s - 2 * pad, s - 2 * pad, r);
   let g = ctx.createLinearGradient(0, pad, s, s - pad);
-  g.addColorStop(0, "rgba(150, 8, 28, 0.78)"); g.addColorStop(0.55, "rgba(70, 0, 12, 0.72)"); g.addColorStop(1, "rgba(25, 0, 5, 0.82)");
+  g.addColorStop(0, "rgba(170, 10, 32, 0.34)"); g.addColorStop(0.55, "rgba(90, 0, 16, 0.22)"); g.addColorStop(1, "rgba(40, 0, 8, 0.32)");
   ctx.fillStyle = g; ctx.fill();
   ctx.save(); ctx.clip();
   // brilho interno vermelho embaixo
   g = ctx.createRadialGradient(s * 0.5, s * 1.05, 0, s * 0.5, s * 1.05, s * 0.7);
-  g.addColorStop(0, "rgba(255, 40, 70, 0.55)"); g.addColorStop(1, "rgba(255, 40, 70, 0)");
+  g.addColorStop(0, "rgba(255, 40, 70, 0.35)"); g.addColorStop(1, "rgba(255, 40, 70, 0)");
   ctx.fillStyle = g; ctx.fillRect(0, 0, s, s);
   // reflexo diagonal do vidro
   ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(s, 0); ctx.lineTo(s, s * 0.18); ctx.quadraticCurveTo(s * 0.5, s * 0.5, 0, s * 0.46); ctx.closePath();
   g = ctx.createLinearGradient(0, 0, 0, s * 0.5);
-  g.addColorStop(0, "rgba(255,255,255,0.30)"); g.addColorStop(1, "rgba(255,255,255,0.02)");
+  g.addColorStop(0, "rgba(255,255,255,0.22)"); g.addColorStop(1, "rgba(255,255,255,0.01)");
   ctx.fillStyle = g; ctx.fill();
   ctx.restore();
   // borda
@@ -203,7 +203,7 @@ function baseGlow(ctx, rand) {
 function wallpaperVidro(ctx, rand) {
   baseGlow(ctx, rand);
   // estilhaços de vidro a partir de um ponto de impacto
-  const ix = W * (0.3 + rand() * 0.4), iy = H * (0.38 + rand() * 0.15);
+  const ix = W * 0.5, iy = H * 0.45;
   const n = 26, angles = Array.from({ length: n }, (_, i) => (i / n) * Math.PI * 2 + rand() * 0.18);
   for (let i = 0; i < n; i++) {
     const a1 = angles[i], a2 = angles[(i + 1) % n] + (i === n - 1 ? Math.PI * 2 : 0);
@@ -235,6 +235,7 @@ function wallpaperVidro(ctx, rand) {
   const g = ctx.createRadialGradient(ix, iy, 0, ix, iy, 260);
   g.addColorStop(0, "rgba(255,120,140,0.55)"); g.addColorStop(0.3, "rgba(220,20,50,0.25)"); g.addColorStop(1, "rgba(0,0,0,0)");
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  templarCross(ctx, ix, iy, 300);
   vignette(ctx); grain(ctx, rand, 14);
 }
 
@@ -267,7 +268,44 @@ function wallpaperGotas(ctx, rand) {
     ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, r, r * (0.9 + rand() * 0.25), 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "rgba(255,255,255,0.55)"; ctx.beginPath(); ctx.arc(x - r * 0.35, y - r * 0.35, r * 0.18, 0, Math.PI * 2); ctx.fill();
   }
+  templarCross(ctx, W * 0.5, H * 0.45, 300);
   vignette(ctx); grain(ctx, rand, 14);
+}
+
+// Cruz pátea da Ordem dos Templários, em vidro vermelho.
+function crossPath(cx, cy, L) {
+  const a = L * 0.13, w = L * 0.42, p = new Path2D();
+  const rot = (x, y, k) => { for (let i = 0; i < k; i++) [x, y] = [-y, x]; return [cx + x, cy + y]; };
+  p.moveTo(...rot(-a, -a, 0));
+  for (let k = 0; k < 4; k++) {
+    const c1 = rot(-a * 0.9, -L * 0.55, k), e1 = rot(-w, -L, k), m = rot(0, -L * 1.04, k), e2 = rot(w, -L, k), c2 = rot(a * 0.9, -L * 0.55, k), end = rot(a, -a, k);
+    p.quadraticCurveTo(...c1, ...e1); p.quadraticCurveTo(...m, ...e2); p.quadraticCurveTo(...c2, ...end);
+  }
+  p.closePath(); return p;
+}
+
+function templarCross(ctx, cx, cy, L) {
+  // halo atrás da cruz
+  let g = ctx.createRadialGradient(cx, cy, 0, cx, cy, L * 1.6);
+  g.addColorStop(0, "rgba(255,40,70,0.35)"); g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const outer = crossPath(cx, cy, L), inner = crossPath(cx, cy, L * 0.86);
+  ctx.save();
+  ctx.shadowColor = "rgba(255,20,50,0.9)"; ctx.shadowBlur = 70;
+  g = ctx.createLinearGradient(cx - L, cy - L, cx + L, cy + L);
+  g.addColorStop(0, "rgba(230,20,50,0.85)"); g.addColorStop(0.5, "rgba(140,0,22,0.75)"); g.addColorStop(1, "rgba(200,10,40,0.85)");
+  ctx.fillStyle = g; ctx.fill(outer);
+  ctx.restore();
+  ctx.save(); ctx.clip(outer);
+  // reflexo de vidro
+  g = ctx.createLinearGradient(cx, cy - L, cx, cy + L * 0.2);
+  g.addColorStop(0, "rgba(255,255,255,0.35)"); g.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.moveTo(cx - L * 1.1, cy - L * 1.1); ctx.lineTo(cx + L * 1.1, cy - L * 1.1); ctx.lineTo(cx + L * 1.1, cy - L * 0.3); ctx.quadraticCurveTo(cx, cy + L * 0.15, cx - L * 1.1, cy + L * 0.05); ctx.closePath(); ctx.fill();
+  ctx.restore();
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "rgba(255,190,200,0.9)"; ctx.lineWidth = 5; ctx.stroke(outer);
+  ctx.strokeStyle = "rgba(255,150,165,0.35)"; ctx.lineWidth = 2.5; ctx.stroke(inner);
 }
 
 function vignette(ctx) {
