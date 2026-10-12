@@ -493,6 +493,21 @@
             to { transform: translateX(200%) rotate(45deg); }
         }
 
+        /* Credit */
+        .credit {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+            color: var(--muted-color);
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 120;
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .main-product-3d { width: 100vw; height: 60vh; top: 40%; }
@@ -639,6 +654,8 @@
         <model-viewer src="https://api.getlayers.ai/storage/v1/object/public/public/assets/soda-14ff8a788d/blueberry.glb"></model-viewer>
         <model-viewer src="https://api.getlayers.ai/storage/v1/object/public/public/assets/soda-14ff8a788d/cherry.glb"></model-viewer>
     </div>
+
+    <footer class="credit">made of pedro</footer>
 
     <script>
         const modelViewer = document.querySelector('#product-model');
