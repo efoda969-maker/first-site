@@ -129,6 +129,7 @@
       const e = activeSet.info.edges;
       doc.style.setProperty('--seq-end', e[e.length - 1][3]);
     }
+    labelNodes.forEach((n) => { n.w = 0; });
     lastFrameDrawn = -1;
     requestDraw(true);
   }
@@ -193,6 +194,14 @@
     updateLabels(set, fpos, p);
   }
 
+  let lastBg = '';
+  let lastInk = '';
+  let lastShade = '';
+  // the shade covers the whole stage: only repaint it when the gradient really changes
+  function setShade(v) {
+    if (v !== lastShade) { lastShade = v; shade.style.background = v; }
+  }
+
   function drawFrame(set, fpos) {
     const n = meta.frames;
     const i0 = Math.floor(fpos);
@@ -247,9 +256,11 @@
 
     // background + legibility shade follow the frame
     const bg = edge[4];
-    if (stage.style.getPropertyValue('--seq-bg') !== bg) {
-      scrolly.style.setProperty('--seq-bg', bg);
-      stage.style.setProperty('--seq-bg', bg);
+    // set colours directly (an inherited CSS variable would restyle every child each frame)
+    if (bg !== lastBg) {
+      lastBg = bg;
+      scrolly.style.backgroundColor = bg;
+      stage.style.backgroundColor = bg;
     }
     // legibility scrim on the copy side (dark during the intro, cream later)
     const portrait = set.name === 'mobile';
@@ -262,13 +273,14 @@
     const behind = sideEdge.map((c, i) => c * 0.25 + sc[i] * 0.75);
     stage.classList.toggle('on-dark', lum(behind) < 0.5);
     if (portrait) {
-      shade.style.background = `linear-gradient(180deg, ${rgba(sc, 0.88)} 0%, ${rgba(sc, 0)} 27%, ${rgba(sc, 0)} 68%, ${rgba(sc, 0.92)} 100%)`;
+      setShade(`linear-gradient(180deg, ${rgba(sc, 0.88)} 0%, ${rgba(sc, 0)} 27%, ${rgba(sc, 0)} 68%, ${rgba(sc, 0.92)} 100%)`);
     } else {
       const k = Math.min(1, Math.abs(sh) / 0.12);
       const dir = sh >= 0 ? 90 : 270;
-      shade.style.background = `linear-gradient(${dir}deg, ${rgba(sc, 0.82 * k)} 0%, ${rgba(sc, 0.5 * k)} 24%, ${rgba(sc, 0)} 48%)`;
+      setShade(`linear-gradient(${dir}deg, ${rgba(sc, +(0.82 * k).toFixed(2))} 0%, ${rgba(sc, +(0.5 * k).toFixed(2))} 24%, ${rgba(sc, 0)} 48%)`);
     }
-    progressEl.style.setProperty('--prog-ink', lum(avg) > 0.5 ? '#0d0b0a' : '#f3e9d2');
+    const ink = lum(avg) > 0.5 ? '#0d0b0a' : '#f3e9d2';
+    if (ink !== lastInk) { lastInk = ink; progressEl.style.color = ink; }
   }
 
   /* ------------------------------------------------------------ synced copy */
@@ -353,10 +365,16 @@
       }
       // keep the line length so the text clears the layer and stays on screen
       const len = portrait ? Math.max(14, Math.min(40, view.w * 0.06)) : Math.max(40, Math.min(110, view.w * 0.06));
-      node.el.style.setProperty('--len', `${len}px`);
-      const wEl = node.el.offsetWidth;
+      if (node.len !== len || !node.w) {
+        // measure once per size change, never between per-frame writes (avoids layout thrash)
+        node.el.style.setProperty('--len', `${len}px`);
+        node.len = len;
+        node.w = node.el.offsetWidth;
+        node.h = node.el.offsetHeight;
+      }
+      const wEl = node.w;
       const x = clamp(side > 0 ? sx : sx - wEl, 6, view.w - wEl - 6);
-      node.el.style.transform = `translate3d(${x.toFixed(1)}px, ${(sy - node.el.offsetHeight / 2).toFixed(1)}px, 0)`;
+      node.el.style.transform = `translate3d(${x.toFixed(1)}px, ${(sy - node.h / 2).toFixed(1)}px, 0)`;
     }
   }
 
@@ -387,7 +405,7 @@
     const started = performance.now();
     const progressCb = (r) => {
       const pct = Math.round(r * 100);
-      loaderBar.style.width = `${pct}%`;
+      loaderBar.style.transform = `scaleX(${r.toFixed(3)})`;
       loaderPct.textContent = pct;
       // all frames ready -> enter; slow network -> enter once half (coarse to fine) is in
       if (r >= 1 || (r >= 0.5 && performance.now() - started > 9000)) enter();

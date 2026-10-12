@@ -105,7 +105,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .loader__inner { width: min(360px, 80vw); text-align: center; }
 .loader__logo { width: 100%; margin: 0 auto 36px; animation: pulse 2.2s ease-in-out infinite; }
 .loader__bar { height: 4px; background: rgba(243, 233, 210, .14); border-radius: 4px; overflow: hidden; }
-.loader__bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--red), var(--orange)); transition: width .25s linear; }
+.loader__bar span { display: block; height: 100%; width: 100%; transform: scaleX(0); transform-origin: left; background: linear-gradient(90deg, var(--red), var(--orange)); transition: transform .25s linear; }
 .loader__txt { font: 600 14px var(--f-cond); letter-spacing: .2em; text-transform: uppercase; opacity: .7; margin: 16px 0 0; }
 @keyframes pulse { 50% { transform: scale(1.03); } }
 
@@ -155,12 +155,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .burger-menu { display: none; }
 
 /* ---------------------------------------------------------------- scroll sequence */
-.scrolly { position: relative; height: 760vh; background: var(--seq-bg, #050403); }
+.scrolly { position: relative; height: 760vh; background: #050403; }
 .stage {
   position: sticky; top: 0;
   height: 100vh; height: 100svh;
   overflow: hidden;
-  background: var(--seq-bg, #050403);
+  background: #050403;
 }
 .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .stage__shade { position: absolute; inset: 0; pointer-events: none; }
@@ -224,7 +224,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   position: absolute; right: var(--gutter); top: 50%; transform: translateY(-50%);
   list-style: none; margin: 0; padding: 0;
   display: grid; gap: 18px;
-  color: var(--prog-ink, var(--cream));
+  color: var(--cream);
   transition: color .4s;
 }
 .progress li {
