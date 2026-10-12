@@ -1,0 +1,4 @@
+render-src/
+/.agents/
+/.claude/
+/skills-lock.json
